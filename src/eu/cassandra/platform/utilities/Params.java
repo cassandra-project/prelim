@@ -1,0 +1,19 @@
+package eu.cassandra.platform.utilities;
+
+/**
+ * Class to hold certain values
+ * 
+ * @author Cassandra developers
+ *
+ */
+public abstract class Params {
+	
+	public final static String APPS_PROPS = "props/appliances.props";
+	
+	public final static String DEMOG_PROPS = "props/demographics.props";
+	
+	public final static String LOG_CONFIG_FILE = "config/log.conf";
+	
+	public final static String REGISTRIES_DIR = "registries/";
+
+}

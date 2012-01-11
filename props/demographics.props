@@ -1,0 +1,16 @@
+installations = 1000
+
+coffee-maker.perc=0.5
+clothes-washer.perc=0.7
+dishwasher.perc=0.35
+dvd-player.perc=0.4
+freezer.perc=0.14
+lighting.perc=0.98
+microwave-oven.perc=0.37
+personal-computer.perc=0.5
+printer.perc=0.2
+radio-player.perc=0.34
+refrigerator.perc=0.99
+stove-oven.perc=0.9
+television.perc=0.92
+tumble-dryer.perc=0.17

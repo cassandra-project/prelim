@@ -1,0 +1,15 @@
+package eu.cassandra.platform.utilities;
+
+/**
+ * Class to hold constants
+ * 
+ * @author Cassandra developers
+ *
+ */
+public class Constants {
+	
+	public final static int MIN_IN_HOUR = 60;
+	
+	public final static int MIN_IN_DAY = 60 * 24;
+
+}
