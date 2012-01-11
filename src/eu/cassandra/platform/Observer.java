@@ -2,6 +2,7 @@ package eu.cassandra.platform;
 
 import java.io.File;
 
+
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.BufferedWriter;
@@ -81,16 +82,14 @@ public class Observer implements Runnable {
 	        t.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }
-
-		
-            
-            
-			
+        }	
 	}
 
 	public void run() {
 		while(tick < endTick) {
+			if(tick % Constants.MIN_IN_DAY == 0) {
+				logger.info("Day " + ((tick / Constants.MIN_IN_DAY) + 1));
+			}
 			Iterator<Installation> iter = installations.iterator();
 			// Calculate the next step of the installations
 			while(iter.hasNext()) {
@@ -105,7 +104,7 @@ public class Observer implements Runnable {
 				double power = installation.getCurrentPower();
 				String name = installation.getName();
 				sumPower += power;
-				logger.info("Tick: " + tick + " \t " + "Name: " + name + 
+				logger.trace("Tick: " + tick + " \t " + "Name: " + name + 
 						" \t " + "Power: " + power);
 			}
 			registry.add(sumPower);
@@ -133,6 +132,8 @@ public class Observer implements Runnable {
 	 * Create folder structure
 	 * 
 	 * @param folder
+	 * 
+	 * TODO Create the root registries directory if it does not exist.
 	 */
 	private void createFolderStucture(File folder) {
 		File tempFolder = new File(folder.getPath());
