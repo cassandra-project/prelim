@@ -1,0 +1,17 @@
+# ignore hidden files such as .project etc.
+.*
+
+# temporary Emacs files
+*~
+
+# binaries
+bin/
+*.class
+
+# registries
+registries/
+
+# logs
+logs/
+*.log
+
