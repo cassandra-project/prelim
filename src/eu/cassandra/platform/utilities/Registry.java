@@ -23,7 +23,6 @@ public class Registry {
 	private String name;
 
 	private Vector<Double> values = new Vector<Double>();
-	private Vector<Double> valuesCO2 = new Vector<Double>();
 
 	public Registry(String aName) {
 		name = aName;
@@ -41,20 +40,8 @@ public class Registry {
 		return values.lastElement().doubleValue();
 	}
 
-	public double getCurrentCO2Value() {
-		return valuesCO2.lastElement().doubleValue();
-	}
-
 	public void setCurrentValue(double value) {
 		values.add(new Double(value));
-	}
-
-	public void setCurrentC02Value(double co2Value) {
-		valuesCO2.add(new Double(co2Value));
-	}
-
-	public double getValueCO2(int tick) {
-		return valuesCO2.get(tick).doubleValue();
 	}
 
 	public double getValue(int tick) {
@@ -63,10 +50,6 @@ public class Registry {
 	
 	public Vector<Double> getValues() {
 		return values;
-	}
-
-	public void setValueCO2(int tick, double co2Value) {
-		valuesCO2.set(tick, new Double(co2Value));
 	}
 
 	public void setValue(int tick, double value) {
@@ -80,31 +63,6 @@ public class Registry {
 		}
 		mean /= values.size();
 		return mean;
-	}
-
-	public double getMeanCO2PerPerson(int startTick, int endTick, 
-			Installation installation) {
-		double mean = 0.0;
-		for (int i = 0; i < valuesCO2.size(); i ++) {
-			mean += valuesCO2.get(i);
-		}
-		mean /= valuesCO2.size();
-		mean /= installation.getPersons().size();
-		return mean;
-	}
-
-	public double getVarianceCO2PerPerson(int startTick, int endTick,
-			Installation installation) {
-		double var = 0.0;
-		int numOfPersons = installation.getPersons().size();
-		double mean = getMeanCO2PerPerson(startTick, endTick,installation);
-
-		for (int i = 0; i < valuesCO2.size(); i ++) {
-			var += (valuesCO2.get(i)/numOfPersons - mean) * 
-			(valuesCO2.get(i)/numOfPersons - mean);
-		}
-		var /= (valuesCO2.size() / numOfPersons);
-		return var;
 	}
 
 	public double getVariance(int startTick, int endTick) {
@@ -123,7 +81,4 @@ public class Registry {
 		setCurrentValue(value);
 	}
 
-	public void addCO2(double co2Value) {
-		setCurrentC02Value(co2Value);
-	}
 }
