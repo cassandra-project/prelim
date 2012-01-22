@@ -7,7 +7,7 @@ import java.lang.Math;
  * @version prelim
  * @since 2012-22-01
  */
-public class Gaussian implements ProbabilityDistribution {
+public class GaussianCDF implements ProbabilityDistribution {
     private double mean;
     private double sigma;
 
@@ -56,7 +56,7 @@ public class Gaussian implements ProbabilityDistribution {
      * Constructor. Sets the parameters of the standard normal
      * distribution, with mean 0 and standard deviation 1.
      */
-    public Gaussian() {
+    public GaussianCDF() {
         mean = 0.0;
         sigma = 1.0;
         precomputed = false;
@@ -66,14 +66,14 @@ public class Gaussian implements ProbabilityDistribution {
      * @param mu Mean value of the Gaussian distribution.
      * @param s Standard deviation of the Gaussian distribution.
      */
-    public Gaussian(double mu, double s) {
+    public GaussianCDF(double mu, double s) {
         mean = mu;
         sigma = s;
         precomputed = false;
     }
 
     public String getDescription() {
-        String description = "Gaussian probability density function";
+        String description = "Gaussian cumulative probability density function";
         return description;
     }
 
@@ -119,13 +119,15 @@ public class Gaussian implements ProbabilityDistribution {
 
         for (int i = 0; i < nBins; i ++) {
             double x = startValue + i * div;
-            histogram[i] = bigPhi(x + div, mean, sigma) - bigPhi(x, mean, sigma);
+            // Value of bin is the probability at the beginning of the
+            // value range.
+            histogram[i] = bigPhi(x, mean, sigma);
         }
         precomputed = true;
     }
 
     public double getProbability(double x) {
-        return phi(x, mean, sigma);
+        return bigPhi(x, mean, sigma);
     }
 
     public double getPrecomputedProbability(double x) {
