@@ -7,7 +7,7 @@ import java.lang.Math;
  * @version prelim
  * @since 2012-22-01
  */
-public class GaussianCDF implements Distribution {
+public class GaussianCDF implements ProbabilityDistribution {
     private double mean;
     private double sigma;
 
@@ -77,7 +77,7 @@ public class GaussianCDF implements Distribution {
         return description;
     }
 
-    public int numberOfParameters() {
+    public int getNumberOfParameters() {
         return 2;
     }
 
@@ -110,14 +110,14 @@ public class GaussianCDF implements Distribution {
             // TODO Throw an exception or whatever.
             return;
         }
-        precomputedFrom = startValue;
-        precomputedTo = endValue;
+        precomputeFrom = startValue;
+        precomputeTo = endValue;
         numberOfBins = nBins;
 
         double div = (endValue - startValue) / (double) nBins;
-        histogram = new int[nBins];
+        histogram = new double[nBins];
 
-        for (i = 0; i < nBins; i ++) {
+        for (int i = 0; i < nBins; i ++) {
             double x = startValue + i * div;
             // Value of bin is the probability at the beginning of the
             // value range.
@@ -134,8 +134,8 @@ public class GaussianCDF implements Distribution {
         if (!precomputed) {
             return -1;
         }
-        double div = (precomputedFrom - precomputedTo) / (double) numberOfBins;
-        int bin = Math.floor((x - precomputedFrom) / div);
+        double div = (precomputeFrom - precomputeTo) / (double) numberOfBins;
+        int bin = (int) Math.floor((x - precomputeFrom) / div);
         if (bin == numberOfBins) {
             bin --;
         }

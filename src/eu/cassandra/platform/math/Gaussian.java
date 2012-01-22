@@ -2,12 +2,22 @@ package eu.cassandra.platform.math;
 
 import java.lang.Math;
 
-
-public class Gaussian implements Distribution {
+/**
+ * @author Christos Diou <diou remove this at iti dot gr>
+ * @version prelim
+ * @since 2012-22-01
+ */
+public class Gaussian implements ProbabilityDistribution {
     private double mean;
     private double sigma;
-    private boolean initialized;
-    private boolean pdf;
+
+    // For precomputation
+    private boolean precomputed;
+    private int numberOfBins;
+    private double precomputeFrom;
+    private double precomputeTo;
+    private double[] histogram;
+
 
     // return phi(x) = standard Gaussian pdf
     private static double phi(double x) {
@@ -42,30 +52,32 @@ public class Gaussian implements Distribution {
         return bigPhi((z - mu) / s);
     }
 
+    /**
+     * Constructor. Sets the parameters of the standard normal
+     * distribution, with mean 0 and standard deviation 1.
+     */
     public Gaussian() {
         mean = 0.0;
         sigma = 1.0;
-        initialized = false;
-        pdf = true;
+        precomputed = false;
     }
 
-    public Gaussian(double m, double s) {
-        mean = m;
+    /**
+     * @param mu Mean value of the Gaussian distribution.
+     * @param s Standard deviation of the Gaussian distribution.
+     */
+    public Gaussian(double mu, double s) {
+        mean = mu;
         sigma = s;
-        pdf = true;
-        initialized = true;
+        precomputed = false;
     }
 
-    public void initialize(double m, double s) {
-        mean = m;
-        sigma = s;
-        pdf = true;
-        initialized = true;
+    public String getDescription() {
+        String description = "Gaussian probability density function";
+        return description;
     }
 
-    
-    // Afto den tha eprepe na einai idio me tin teleftaia synartisi ??
-    public int numberOfParameters() {
+    public int getNumberOfParameters() {
         return 2;
     }
 
@@ -78,7 +90,6 @@ public class Gaussian implements Distribution {
         default:
             return 0.0;
         }
-       // return 0.0; // Will never reach;
     }
 
     public void setParameter(int index, double value) {
@@ -94,49 +105,38 @@ public class Gaussian implements Distribution {
         }
     }
 
-    public boolean isInitialized() {
-        return initialized;
+    public void precompute(double startValue, double endValue, int nBins) {
+        if (startValue >= endValue) {
+            // TODO Throw an exception or whatever.
+            return;
+        }
+        precomputeFrom = startValue;
+        precomputeTo = endValue;
+        numberOfBins = nBins;
+
+        double div = (endValue - startValue) / (double) nBins;
+        histogram = new double[nBins];
+
+        for (int i = 0; i < nBins; i ++) {
+            double x = startValue + i * div;
+            histogram[i] = bigPhi(x + div, mean, sigma) - bigPhi(x, mean, sigma);
+        }
+        precomputed = true;
     }
 
-    public double getPdf(double x) {
-        if (!initialized) {
-            return 0.0; // Should replace with error check
-        }
-        else {
-            return (1 / (Math.sqrt(2 * Math.PI) * sigma)) *
-                Math.exp(-(x - mean) * (x - mean) / (2 * sigma * sigma));
-        }
-    }
-    
-    public double getCdf(double x) {
-        if (!initialized) {
-            return 0.0; // Should replace with error check
-        }
-        else {
-            return bigPhi(x, mean, sigma);
-        }
-    }
-    
-    public void setDefaultPdf() {
-        pdf = true;
-    }
-    
-    public void setDefaultCdf() {
-        pdf = false;
-    }
-    
     public double getProbability(double x) {
-        if (pdf) {
-            return getPdf(x);
-        } else {
-            return getCdf(x);
-        }
+        return phi(x, mean, sigma);
     }
 
-	@Override
-	public int getNumberOfParameters() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
+    public double getPrecomputedProbability(double x) {
+        if (!precomputed) {
+            return -1;
+        }
+        double div = (precomputeFrom - precomputeTo) / (double) numberOfBins;
+        int bin = (int) Math.floor((x - precomputeFrom) / div);
+        if (bin == numberOfBins) {
+            bin --;
+        }
+        return histogram[bin];
+    }
 }
