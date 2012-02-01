@@ -1,24 +1,32 @@
 package eu.cassandra.entities.appliances;
 
 import eu.cassandra.entities.installations.Installation;
+import eu.cassandra.platform.utilities.Constants;
 import eu.cassandra.platform.utilities.Params;
 import eu.cassandra.platform.utilities.RNG;
-import eu.cassandra.platform.utilities.Registry;
-import eu.cassandra.platform.utilities.Utils;
+import eu.cassandra.platform.utilities.FileUtils;
 
+/**
+ * Class modeling an electric appliance. The appliance has a stand by 
+ * consumption otherwise there are a number of periods along with their 
+ * consumption rates.
+ * 
+ * @author kyrcha
+ * @version prelim
+ */
 public class Appliance {
 	private final int id;
 	private final String name;
 	private final Installation installation;
-	private final double[] consumption;
+	private final float[] consumption;
 	private final int[] periods;
 	private final int totalCycleTime;
-	private final double standByConsumption;
+	private final float standByConsumption;
 	private final boolean base;
 	
 	private boolean inUse;
 	private long onTick;
-	private Registry registry;
+	private String who;
 	
 	public static class Builder {
 		private static int idCounter = 0;
@@ -26,32 +34,29 @@ public class Appliance {
 		private final int id;
 		private final String name;
 		private final Installation installation;
-		private final double[] consumption;
+		private final float[] consumption;
 		private final int[] periods;
 		private final int totalCycleTime;
-		private final double standByConsumption;
+		private final float standByConsumption;
 		private final boolean base;
 		// Optional or state related variables
 		private long onTick = -1;
-		private Registry registry = null;
+		private String who = null;
 		public Builder(String aname, Installation ainstallation) {
 			id = idCounter++;
 			name = aname;
 			installation = ainstallation;
 			consumption = 
-					Utils.getDoubleArray(Params.APPS_PROPS, name+".power");
-			periods = Utils.getIntArray(Params.APPS_PROPS, name+".periods");
+					FileUtils.getFloatArray(Params.APPS_PROPS, name+".power");
+			periods = FileUtils.getIntArray(Params.APPS_PROPS, name+".periods");
 			int sum = 0;
 			for(int i = 0; i < periods.length; i++) {
 				sum += periods[i];
 			}
 			totalCycleTime = sum;
 			standByConsumption = 
-					Utils.getDouble(Params.APPS_PROPS, name+".stand-by");
-			base = Utils.getBool(Params.APPS_PROPS, name+".base");
-		}
-		public Builder registry(Registry aregistry) {
-			registry = aregistry; return this;
+					FileUtils.getFloat(Params.APPS_PROPS, name+".stand-by");
+			base = FileUtils.getBool(Params.APPS_PROPS, name+".base");
 		}
 		public Appliance build() {
 			return new Appliance(this);
@@ -67,13 +72,9 @@ public class Appliance {
 		periods = builder.periods;
 		totalCycleTime = builder.totalCycleTime;
 		base = builder.base;
-		registry = builder.registry;
 		inUse = (base) ? true : false;
-		onTick = (base) ? RNG.nextInt(100) : builder.onTick; 
-	}
-	
-	public void createRegistry(Registry aregistry) {
-		registry = aregistry;
+		onTick = (base) ? RNG.nextInt(Constants.MIN_IN_DAY) : builder.onTick;
+		who = builder.who;
 	}
 
 	public int getId() {
@@ -92,10 +93,10 @@ public class Appliance {
 		return inUse;
 	}
 
-	public double getPower(long tick) {
-		double power;
+	public float getPower(long tick) {
+		float power;
 		if(isInUse()) {
-			long relativeTick = tick - onTick;
+			long relativeTick = Math.abs(tick - onTick);
 			long tickInCycle = relativeTick % totalCycleTime;
 			int ticks = 0;
 			int periodIndex = 0;
@@ -110,12 +111,7 @@ public class Appliance {
 		} else {
 			power = standByConsumption;
 		}
-		if(registry != null) updateRegistry(power);
 		return power;
-	}
-
-	private void updateRegistry(double power) {
-		getRegistry().add(power);
 	}
 
 	public void turnOff() {
@@ -125,30 +121,27 @@ public class Appliance {
 		}
 	}
 
-	public void turnOn(long tick) {
+	public void turnOn(long tick, String awho) {
 		inUse = true;
 		onTick = tick;
+		who = awho;
 	}
 
 	public long getOnTick() {
 		return onTick;
 	}
-
-	public double getCurrentPower() {
-		return getRegistry().getCurrentValue();
-	}
-
-	public Registry getRegistry() {
-		return registry;
+	
+	public String getWho() {
+		return who;
 	}
 	
 	public static void main(String[] args) {
 		Appliance frige = new Appliance.Builder("refrigerator", 
-				null).registry(new Registry("power")).build();
+				null).build();
 		System.out.println(frige.getId());
 		System.out.println(frige.getName());
 		Appliance freezer = new Appliance.Builder("freezer", 
-				null).registry(new Registry("power")).build();
+				null).build();
 		System.out.println(freezer.getId());
 		System.out.println(freezer.getName());
 		for(int i = 0; i < 100; i++) {

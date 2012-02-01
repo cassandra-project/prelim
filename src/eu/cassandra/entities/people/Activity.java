@@ -1,43 +1,59 @@
 package eu.cassandra.entities.people;
 
 import java.util.HashMap;
+import java.util.PriorityQueue;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
 import eu.cassandra.entities.appliances.Appliance;
-import eu.cassandra.platform.math.Distribution;
-import eu.cassandra.platform.math.Gaussian;
-import eu.cassandra.platform.utilities.Constants;
+import eu.cassandra.platform.Event;
+import eu.cassandra.platform.SimCalendar;
+import eu.cassandra.platform.math.ProbabilityDistribution;
 import eu.cassandra.platform.utilities.RNG;
+import eu.cassandra.platform.utilities.Utils;
 
 public class Activity {
-    private final double onPrior;
-    private final double timePrior;
-    private final Distribution onDistribution;
-    private final Distribution offDistribution;
-    private final Vector<Appliance> appliances;
-    private boolean started;
-    private long startedTick;
+	
+	static Logger logger = Logger.getLogger(Activity.class);
+	
+	private final String name;
+	private final HashMap<String, ProbabilityDistribution> nTimesGivenWeakDay;
+	private final ProbabilityDistribution probStartTime;
+	private final ProbabilityDistribution probDuration;
+	private Vector<Appliance> appliances;
+	private Vector<Double> probApplianceUsed;
     public static class Builder {
     	// Required parameters
-    	private final double onPrior;
-        private final double timePrior;
-        private final Distribution onDistribution;
-        private final Distribution offDistribution;
-        private final Vector<Appliance> appliances;
-        // Optional parameters
-        private boolean started = false;
-        private long startedTick = -1;
-        public Builder(double aonPrior, double atimePrior, Distribution onDist,
-        		Distribution offDist) {
-        	onPrior = aonPrior;
-        	timePrior = atimePrior;
-        	onDistribution = onDist;
-        	offDistribution = offDist;
+    	private final String name;
+    	private final HashMap<String, ProbabilityDistribution> nTimesGivenWeakDay;
+    	private final ProbabilityDistribution probStartTime;
+    	private final ProbabilityDistribution probDuration;
+        // Optional parameters: not available    	
+    	private Vector<Appliance> appliances;
+    	private Vector<Double> probApplianceUsed;
+        public Builder(String aname, ProbabilityDistribution start, 
+        		ProbabilityDistribution duration) {
+        	name = aname;
+        	probStartTime = start;
+        	probDuration = duration;
         	appliances = new Vector<Appliance>();
+        	probApplianceUsed = new Vector<Double>();
+        	nTimesGivenWeakDay = new HashMap<String,ProbabilityDistribution>();
         }
         public Builder appliances(Appliance... apps) {
         	for(Appliance app : apps) {
         		appliances.add(app);
+        	}
+        	return this;
+        }
+        public Builder times(String day, ProbabilityDistribution timesPerDay) {
+        	nTimesGivenWeakDay.put(day, timesPerDay);
+        	return this;
+        }
+        public Builder applianceUsed(Double... probs) {
+        	for(Double prob : probs) {
+        		probApplianceUsed.add(prob);
         	}
         	return this;
         }
@@ -46,198 +62,67 @@ public class Activity {
         }
     }
     private Activity(Builder builder) {
-    	onPrior = builder.onPrior;
-    	timePrior = builder.timePrior;
-    	onDistribution = builder.onDistribution;
-    	offDistribution = builder.offDistribution;
+    	name = builder.name;
     	appliances = builder.appliances;
-    	started = builder.started;
-    	startedTick = builder.startedTick;
+    	nTimesGivenWeakDay = builder.nTimesGivenWeakDay;
+    	probStartTime = builder.probStartTime;
+    	probDuration = builder.probDuration;
+    	probApplianceUsed = builder.probApplianceUsed;
 	}
-
-    public boolean isInitialized() {
-        return started;
-    }
-
-    public Distribution getOnDistribution() {
-        return onDistribution;
-    }
-
-    public Distribution getOffDistribution() {
-        return offDistribution;
-    }
-
-    public double turnOnProbability(long tick) {
-        if (started) {
-            return 0.0;
-        }
-        double tickOfDay = (double) (tick % Constants.MIN_IN_DAY);
-        return onDistribution.getProbability(tickOfDay) * onPrior / timePrior;
-    };
-
-    public double turnOffProbability(long tick) {
-        if (!started) {
-            return 0.0;
-        }
-        double onDuration = (double) (tick - startedTick);
-        return offDistribution.getProbability(onDuration);
-    }
-
-    public void act(long tick) {
-        double r = RNG.nextDouble();
-        if(isInitialized() && (r <= turnOffProbability(tick))) {
-        	started = false;
-        	for (Appliance appliance : appliances){
-        		appliance.turnOff();
-        	}
-        }
-        if(!isInitialized() && (r <= turnOnProbability(tick))) {
-        	started = true;
-        	startedTick = tick;
-        	for (Appliance appliance : appliances){
-        		appliance.turnOn(tick);
-        	}
-        }
+    
+    public void addAppliance(Appliance a, Double prob) {
+    	appliances.add(a);
+    	probApplianceUsed.add(prob);
     }
     
-    public static Vector<Activity> availableActivities(Vector<Appliance> apps) {
-    	Vector<Activity> vec = new Vector<Activity>();
-    	// Put them in a hash map
-    	HashMap<String, Appliance> hashmap = new HashMap<String, Appliance>();
-    	for(Appliance a : apps) {
-    		hashmap.put(a.getName(), a);
+    public String getName() {
+    	return name;
+    }
+    
+    public void updateDailySchedule(int tick, PriorityQueue<Event> queue) {
+    	/*
+    	 *  Decide on the number of times the activity is going to be activated
+    	 *  during a day
+    	 */
+    	ProbabilityDistribution numOfTimesProb;
+    	if(SimCalendar.isWeekend(tick)) {
+    		numOfTimesProb = nTimesGivenWeakDay.get("weekend");
+    	} else {
+    		numOfTimesProb = nTimesGivenWeakDay.get("weekday");
     	}
     	
-    	if(hashmap.containsKey("coffee-maker")) {
-    		double durationInMins = 30;
-    		double onPrior = durationInMins/Constants.MIN_IN_DAY;
-    		double timePrior = 1/(Constants.MIN_IN_DAY - durationInMins);
-    		double timeOfDay = 12 + RNG.nextDoublePlusMinus() * 12;
-    		Gaussian gaussianOn = new Gaussian(60 * timeOfDay, 5);
-    		Gaussian gaussianOff = new Gaussian(60 * 0.5, 10);
-    		gaussianOff.setDefaultCdf();
-    		Activity activity = 
-					new Activity.Builder(
-							onPrior, 
-							timePrior, 
-							gaussianOn, 
-							gaussianOff).
-							appliances(hashmap.get("coffee-maker")).build();
-    		vec.add(activity);
+    	int numOfTimes = numOfTimesProb.getPrecomputedBin();
+    	logger.trace(numOfTimes);
+    	/*
+    	 * Decide the duration and start time for each activity activation
+    	 */
+    	for(int i = 1; i <= numOfTimes; i++) {
+    		int duration = probDuration.getPrecomputedBin();
+    		int startTime = probStartTime.getPrecomputedBin();
+    		// Select appliances to be switched on
+    		for(int j = 0; j < appliances.size(); j++) {
+    			if(RNG.nextDouble() < probApplianceUsed.get(j).doubleValue()) {
+    				Appliance a = appliances.get(j);
+    				int appDuration = duration;
+    				int appStartTime = startTime;
+    				String hash = 
+    						Utils.hashcode((
+    								new Long(System.currentTimeMillis()).toString()));
+    				Event eOn = 
+    						new Event(tick + appStartTime, 
+    								Event.SWITCH_ON, 
+    								a,
+    								hash);
+    				queue.offer(eOn);
+    				Event eOff = 
+    						new Event(tick + appStartTime + appDuration, 
+    								Event.SWITCH_OFF, 
+    								a,
+    								hash);
+    				queue.offer(eOff);
+    			}
+    		}
     	}
-    	
-    	if(hashmap.containsKey("dvd-player") && 
-    			hashmap.containsKey("television")) {
-    		double durationInMins = 120;
-    		double onPrior = durationInMins/Constants.MIN_IN_DAY;
-    		double timePrior = 1/(Constants.MIN_IN_DAY - durationInMins);
-    		double timeOfDay = 12 + RNG.nextDoublePlusMinus() * 12;
-    		Gaussian gaussianOn = new Gaussian(60 * timeOfDay, 60);
-    		Gaussian gaussianOff = new Gaussian(60 * 2, 30);
-    		gaussianOff.setDefaultCdf();
-    		Activity activity = 
-					new Activity.Builder(
-							onPrior, 
-							timePrior, 
-							gaussianOn, 
-							gaussianOff).
-							appliances(hashmap.get("dvd-player"),
-									hashmap.get("television")).build();
-    		vec.add(activity);
-    	}
-
-    	if(hashmap.containsKey("television")) {
-    		double durationInMins = 240;
-    		double onPrior = durationInMins/Constants.MIN_IN_DAY;
-    		double timePrior = 1/(Constants.MIN_IN_DAY - durationInMins);
-    		double timeOfDay = 12 + RNG.nextDoublePlusMinus() * 12;
-    		Gaussian gaussianOn = new Gaussian(60 * timeOfDay, 60);
-    		Gaussian gaussianOff = new Gaussian(60 * 4, 60);
-    		gaussianOff.setDefaultCdf();
-    		Activity activity = 
-					new Activity.Builder(
-							onPrior, 
-							timePrior, 
-							gaussianOn, 
-							gaussianOff).
-							appliances(hashmap.get("television")).build();
-    		vec.add(activity);
-    	}
-    	
-    	if(hashmap.containsKey("stove-oven")) {
-    		double durationInMins = 90;
-    		double onPrior = durationInMins/Constants.MIN_IN_DAY;
-    		double timePrior = 1/(Constants.MIN_IN_DAY - durationInMins);
-    		double timeOfDay = 17 + RNG.nextDoublePlusMinus() * 7;
-    		Gaussian gaussianOn = new Gaussian(60 * timeOfDay, 30);
-    		Gaussian gaussianOff = new Gaussian(60 * 1.5, 30);
-    		gaussianOff.setDefaultCdf();
-    		Activity activity = 
-					new Activity.Builder(
-							onPrior, 
-							timePrior, 
-							gaussianOn, 
-							gaussianOff).
-							appliances(hashmap.get("stove-oven")).build();
-    		vec.add(activity);
-    	}
-    	
-    	if(hashmap.containsKey("microwave-oven")) {
-    		double durationInMins = 10;
-    		double onPrior = durationInMins/Constants.MIN_IN_DAY;
-    		double timePrior = 1/(Constants.MIN_IN_DAY - durationInMins);
-    		double timeOfDay = 12 + RNG.nextDoublePlusMinus() * 12;
-    		Gaussian gaussianOn = new Gaussian(60 * timeOfDay, 30);
-    		Gaussian gaussianOff = new Gaussian(60 * 0.25, 5);
-    		gaussianOff.setDefaultCdf();
-    		Activity activity = 
-					new Activity.Builder(
-							onPrior, 
-							timePrior, 
-							gaussianOn, 
-							gaussianOff).
-							appliances(hashmap.get("microwave-oven")).build();
-    		vec.add(activity);
-    	}
-    	
-    	if(hashmap.containsKey("dishwasher")) {
-    		double durationInMins = 60;
-    		double onPrior = durationInMins/Constants.MIN_IN_DAY;
-    		double timePrior = 1/(Constants.MIN_IN_DAY - durationInMins);
-    		double timeOfDay = 12 + RNG.nextDoublePlusMinus() * 12;
-    		Gaussian gaussianOn = new Gaussian(60 * timeOfDay, 30);
-    		Gaussian gaussianOff = new Gaussian(60 * 1, 10);
-    		gaussianOff.setDefaultCdf();
-    		Activity activity = 
-					new Activity.Builder(
-							onPrior, 
-							timePrior, 
-							gaussianOn, 
-							gaussianOff).
-							appliances(hashmap.get("dishwasher")).build();
-    		vec.add(activity);
-    	}
-    	
-    	if(hashmap.containsKey("clothes-washer")) {
-    		double durationInMins = 240;
-    		double onPrior = durationInMins/Constants.MIN_IN_DAY;
-    		double timePrior = 1/(Constants.MIN_IN_DAY - durationInMins);
-    		double timeOfDay = 12 + RNG.nextDoublePlusMinus() * 12;
-    		Gaussian gaussianOn = new Gaussian(60 * timeOfDay, 60);
-    		Gaussian gaussianOff = new Gaussian(60 * 4, 120);
-    		gaussianOff.setDefaultCdf();
-    		Activity activity = 
-					new Activity.Builder(
-							onPrior, 
-							timePrior, 
-							gaussianOn, 
-							gaussianOff).
-							appliances(hashmap.get("clothes-washer")).build();
-    		vec.add(activity);
-    	}
-    	
-    	return vec;
-
     }
     
 }
