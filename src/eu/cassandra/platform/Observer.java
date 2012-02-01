@@ -1,13 +1,8 @@
 package eu.cassandra.platform;
 
 import java.io.File;
-
-
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.BufferedWriter;
 import java.util.Calendar;
-import java.util.Iterator;
+import java.util.PriorityQueue;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
@@ -17,62 +12,38 @@ import eu.cassandra.entities.appliances.Appliance;
 import eu.cassandra.entities.installations.Installation;
 import eu.cassandra.entities.people.Activity;
 import eu.cassandra.entities.people.Person;
+import eu.cassandra.platform.math.Gaussian;
+import eu.cassandra.platform.math.ProbabilityDistribution;
 import eu.cassandra.platform.utilities.Constants;
 import eu.cassandra.platform.utilities.Params;
 import eu.cassandra.platform.utilities.RNG;
 import eu.cassandra.platform.utilities.Registry;
-import eu.cassandra.platform.utilities.Utils;
+import eu.cassandra.platform.utilities.FileUtils;
 
+/**
+ * The Observer can simulate up to 4085 years of simulation.
+ * 
+ * @author kyrcha
+ *
+ */
 public class Observer implements Runnable {
 	
 	static Logger logger = Logger.getLogger(Observer.class);
 
 	private Vector<Installation> installations = new Vector<Installation>();
+	
+	private PriorityQueue<Event> queue;
 
-	private long tick = 0;
+	private int tick = 0;
 
-	private long endTick = Constants.MIN_IN_DAY * 3;
+	private int endTick; 
 
-	private Registry registry = new Registry("group");
+	private Registry registry;
 
 	public Observer() {
 		PropertyConfigurator.configure(Params.LOG_CONFIG_FILE);
-		// Read number of installations and create them
-		int numOfInstallations = Utils.getInt(Params.DEMOG_PROPS, "installations");
-		// Read the different kinds of appliances
-		String[] appliances = Utils.getStringArray(Params.APPS_PROPS, "appliances");
-		// Read appliances statistics
-		double[] ownershipPerc = new double[appliances.length];
-		for(int i = 0; i < appliances.length; i++) {
-			ownershipPerc[i] = 
-					Utils.getDouble(Params.DEMOG_PROPS, appliances[i]+".perc");
-		}
-		for(int i = 0; i < numOfInstallations; i++) {
-			// Make the installation
-			Installation inst = new Installation.Builder(i+"").
-					registry(new Registry(i+"")).build();
-			// Create the appliances
-			for(int j = 0; j < appliances.length; j++) {
-				double dice = RNG.nextDouble();
-				if(dice < ownershipPerc[j]) {
-					Appliance app = 
-							new Appliance.Builder(appliances[j], inst).build();
-					String regName = inst.getId() + "." + app.getName() + "." +
-							app.getId();
-//					app.createRegistry(new Registry(regName));
-					inst.addAppliance(app);
-				}
-			}
-			// Create a person
-			Person person = new Person(); // TODO Builder pattern
-			Vector<Activity> activities = 
-					Activity.availableActivities(inst.getAppliances());
-			for(Activity a : activities) {
-				person.addActivity(a);
-			}
-			inst.addPerson(person);
-			installations.add(inst);
-		}
+		// Setup simulation
+		setup();
 	}
 
 	public void simulate() {
@@ -89,86 +60,159 @@ public class Observer implements Runnable {
 		while(tick < endTick) {
 			if(tick % Constants.MIN_IN_DAY == 0) {
 				logger.info("Day " + ((tick / Constants.MIN_IN_DAY) + 1));
+				for(Installation installation : installations) {
+					installation.updateDailySchedule(tick, queue);
+				}
+				logger.info("Daily queue size: " + queue.size() + 
+						"(" + SimCalendar.isWeekend(tick) +")");
 			}
-			Iterator<Installation> iter = installations.iterator();
-			// Calculate the next step of the installations
-			while(iter.hasNext()) {
-				Installation installation = iter.next();
+			while(queue.peek().getTick() == tick) {
+				Event e = queue.poll();
+				e.apply();
+			}
+			/*
+			 *  Calculate the total power for this simulation step of all the
+			 *  installations 
+			 */
+			float sumPower = 0;
+			for(Installation installation : installations) {
 				installation.nextStep(tick);
-			}
-			// Gather information about the installations
-			Iterator<Installation> iter2 = installations.iterator();
-			double sumPower = 0;
-			while(iter2.hasNext()) {
-				Installation installation = iter2.next();
-				double power = installation.getCurrentPower();
-				String name = installation.getName();
+				float power = installation.getPower(tick);
 				sumPower += power;
+				String name = installation.getName();
 				logger.trace("Tick: " + tick + " \t " + "Name: " + name + 
 						" \t " + "Power: " + power);
 			}
-			registry.add(sumPower);
+			registry.setValue(tick, sumPower);
 			tick++;
 		}
 	}
 
-	public void flushRegistriesOnFiles() {
+	/**
+	 * Flush the contents of registries to the file system.
+	 */
+	public void flush() {
 		File folder = new File(Params.REGISTRIES_DIR + 
 				Calendar.getInstance().getTimeInMillis() + "/");
-		createFolderStucture(folder);
-
-		//Flush installations and appliances
+		FileUtils.createFolderStucture(folder);
+		// Flush installations and appliances
 		for(Installation installation : installations) {
-//			saveRegistry(folder,installation.getRegistry());
-
-			for(Appliance appliance : installation.getAppliances()) {
-//				saveRegistry(folder, appliance.getRegistry());
+			installation.getRegistry().saveRegistry(folder);
+		}
+		registry.saveRegistry(folder);
+	}
+	
+	private void setup() {
+		logger.info("Simulation setup started.");
+		// Initialize simulation variables
+		int numOfDays = FileUtils.getInt(Params.SIM_PROPS, "days");
+		int numOfInstallations = 
+				FileUtils.getInt(Params.SIM_PROPS, "installations");
+		endTick = Constants.MIN_IN_DAY * numOfDays;
+		registry = new Registry("sim", endTick);
+		queue = new PriorityQueue<Event>(2 * numOfInstallations);
+		
+		// Read the different kinds of appliances
+		String[] appliances = 
+				FileUtils.getStringArray(Params.APPS_PROPS, "appliances");
+		// Read appliances statistics
+		double[] ownershipPerc = new double[appliances.length];
+		for(int i = 0; i < appliances.length; i++) {
+			ownershipPerc[i] = 
+					FileUtils.getDouble(Params.DEMOG_PROPS, 
+							appliances[i]+".perc");
+		}
+		// Create the installations and put appliances inside
+		for(int i = 0; i < numOfInstallations; i++) {
+			// Make the installation
+			Installation inst = new Installation.Builder(i+"").
+					registry(new Registry(i+"", endTick)).build();
+			// Create the appliances
+			for(int j = 0; j < appliances.length; j++) {
+				double dice = RNG.nextDouble();
+				if(dice < ownershipPerc[j]) {
+					Appliance app = 
+							new Appliance.Builder(appliances[j], inst).build();
+					inst.addAppliance(app);
+					logger.trace(i + " " + appliances[j]);
+				}
+			}
+			installations.add(inst);
+		}
+		// Load possible activities
+		String[] activities = 
+				FileUtils.getStringArray(Params.ACT_PROPS, "activities");
+		// Put persons inside installations along with activities
+		for(int i = 0; i < numOfInstallations; i++) {
+			Installation inst = installations.get(i);
+			int type = (RNG.nextInt() < 0.5) ? 1 : 2;
+			Person person = 
+					new Person.Builder("Person " + i, type, inst).build();
+			inst.addPerson(person);
+			for(int j = 0; j < activities.length; j++) {
+				String[] appsNeeded = 
+						FileUtils.getStringArray(Params.ACT_PROPS, 
+								activities[j]+".apps");
+				Vector<Appliance> existing = new Vector<Appliance>();
+				for(int k = 0; k < appsNeeded.length; k++) {
+					Appliance a = inst.applianceExists(appsNeeded[k]);
+					if(a != null) {
+						existing.add(a);
+					}
+				}
+				if(existing.size() > 0) {
+					logger.trace(i + " " + activities[j]);
+					double mu = FileUtils.getDouble(
+									Params.ACT_PROPS, 
+									activities[j]+".startTime.mu."+type);
+					double sigma = FileUtils.getDouble(
+									Params.ACT_PROPS, 
+									activities[j]+".startTime.sigma."+type);
+					ProbabilityDistribution start = new Gaussian(mu, sigma);
+					start.precompute(0, 1439, 1440);
+					
+					mu = FileUtils.getDouble(
+									Params.ACT_PROPS, 
+									activities[j]+".duration.mu."+type);
+					sigma = FileUtils.getDouble(
+									Params.ACT_PROPS, 
+									activities[j]+".duration.sigma."+type);
+					ProbabilityDistribution duration = new Gaussian(mu, sigma);
+					duration.precompute(1, 1439, 1439);
+					
+					mu = FileUtils.getDouble(
+							Params.ACT_PROPS, 
+							activities[j]+".weekday.mu."+type);
+					sigma = FileUtils.getDouble(
+							Params.ACT_PROPS, 
+							activities[j]+".weekday.sigma."+type);
+					ProbabilityDistribution weekday = new Gaussian(mu, sigma);
+					weekday.precompute(0, 3, 4);
+					
+					mu = FileUtils.getDouble(
+							Params.ACT_PROPS, 
+							activities[j]+".weekend.mu."+type);
+					sigma = FileUtils.getDouble(
+							Params.ACT_PROPS, 
+							activities[j]+".weekend.sigma."+type);
+					ProbabilityDistribution weekend = new Gaussian(mu, sigma);
+					weekend.precompute(0, 3, 4);
+					
+					Activity a = new Activity.Builder(
+							activities[j], 
+							start, 
+							duration).
+							times("weekday", weekday).
+							times("weekend", weekend).
+							build();
+					for(Appliance e : existing) {
+						a.addAppliance(e, 1.0);
+					}
+					person.addActivity(a);
+				}
 			}
 		}
-		saveRegistry(folder,registry);
-	}
-
-	/**
-	 * Create folder structure
-	 * 
-	 * @param folder
-	 * 
-	 * TODO Create the root registries directory if it does not exist.
-	 */
-	private void createFolderStucture(File folder) {
-		File tempFolder = new File(folder.getPath());
-		Vector<File> folders = 	new Vector<File>();
-		while(tempFolder.getParentFile() != null && 
-				tempFolder.getParent() != tempFolder.getPath()) {
-			folders.add(tempFolder);
-			tempFolder = tempFolder.getParentFile();
-		}
-		if(folders != null && folders.size() > 0) {
-			if(!folders.get(0).getParentFile().exists())
-				folders.get(0).getParentFile().mkdir();
-		}
-		for(int i = folders.size()-1; i>=0; i--) {
-			if(!folders.get(i).exists())
-				folders.get(i).mkdir();
-		}
-	}
-
-	private void saveRegistry(File parrentFolder, Registry registry) {
-		try {
-			File file = new File(parrentFolder.getPath() + "/" + 
-					registry.getName() + ".csv");
-			FileWriter fileWriter = new FileWriter(file);
-			BufferedWriter bufWriter = new BufferedWriter(fileWriter);
-			for(int i =0; i<registry.getValues().size(); i++) {
-				bufWriter.write(i + "," + registry.getValues().get(i));
-				bufWriter.newLine();
-			}
-			bufWriter.flush();
-			bufWriter.close();
-			fileWriter.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		logger.info("Simulation setup finished.");
 	}
 	
 }

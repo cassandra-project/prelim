@@ -2,21 +2,23 @@ package eu.cassandra.platform.math;
 
 import java.lang.Math;
 
+import eu.cassandra.platform.utilities.RNG;
+
 /**
  * @author Christos Diou <diou remove this at iti dot gr>
  * @version prelim
  * @since 2012-22-01
  */
 public class Gaussian implements ProbabilityDistribution {
-    private double mean;
-    private double sigma;
+    protected double mean;
+    protected double sigma;
 
     // For precomputation
-    private boolean precomputed;
-    private int numberOfBins;
-    private double precomputeFrom;
-    private double precomputeTo;
-    private double[] histogram;
+    protected boolean precomputed;
+    protected int numberOfBins;
+    protected double precomputeFrom;
+    protected double precomputeTo;
+    protected double[] histogram;
 
 
     // return phi(x) = standard Gaussian pdf
@@ -40,7 +42,7 @@ public class Gaussian implements ProbabilityDistribution {
 
         double sum = 0.0;
         double term = z;
-        for (int i = 3; Math.abs(term) < 1e-5; i += 2) {
+        for (int i = 3; Math.abs(term) > 1e-5; i += 2) {
             sum  += term;
             term *= (z * z) / i;
         }
@@ -48,7 +50,7 @@ public class Gaussian implements ProbabilityDistribution {
     }
 
     // return Phi(z, mu, s) = Gaussian cdf with mean mu and stddev s
-    private static double bigPhi(double z, double mu, double s) {
+    protected static double bigPhi(double z, double mu, double s) {
         return bigPhi((z - mu) / s);
     }
 
@@ -117,9 +119,13 @@ public class Gaussian implements ProbabilityDistribution {
         double div = (endValue - startValue) / (double) nBins;
         histogram = new double[nBins];
 
-        for (int i = 0; i < nBins; i ++) {
+        histogram[0] = bigPhi(startValue + div, mean, sigma);
+        for (int i = 1; i < nBins - 1; i++) {
             double x = startValue + i * div;
             histogram[i] = bigPhi(x + div, mean, sigma) - bigPhi(x, mean, sigma);
+        }
+        if (nBins > 1) {
+        	histogram[nBins - 1] = 1 - bigPhi(endValue - div, mean, sigma);
         }
         precomputed = true;
     }
@@ -132,11 +138,61 @@ public class Gaussian implements ProbabilityDistribution {
         if (!precomputed) {
             return -1;
         }
-        double div = (precomputeFrom - precomputeTo) / (double) numberOfBins;
+        double div = (precomputeTo - precomputeFrom) / (double) numberOfBins;
         int bin = (int) Math.floor((x - precomputeFrom) / div);
         if (bin == numberOfBins) {
             bin --;
         }
         return histogram[bin];
     }
+    
+    public int getPrecomputedBin() {
+    	if (!precomputed) {
+            return -1;
+        }
+    	double div = (precomputeTo - precomputeFrom) / (double) numberOfBins;
+    	double dice = RNG.nextDouble();
+    	double sum = 0;
+    	for(int i = 0; i < numberOfBins; i++) {
+    		sum += histogram[i];
+    		if(dice < sum) return (int)(precomputeFrom + i * div);
+    	}
+    	return -1;
+    }
+    
+    public static void main(String[] args) {
+    	System.out.println("Testing num of time per day.");
+    	Gaussian g = new Gaussian(2, 0.5);
+    	g.precompute(0, 3, 4);
+    	double sum = 0;
+    	for(int i = 0; i <= 3; i++) {
+    		sum += g.getPrecomputedProbability(i);
+    		System.out.println(g.getPrecomputedProbability(i));
+    	}
+    	System.out.println(sum);
+    	RNG.init();
+    	System.out.println(g.getPrecomputedBin());
+    	System.out.println(g.getPrecomputedBin());
+    	System.out.println(g.getPrecomputedBin());
+    	System.out.println(g.getPrecomputedBin());
+    	System.out.println(g.getPrecomputedBin());
+    	System.out.println("Testing start time.");
+    	g = new Gaussian(620, 90);
+    	g.precompute(0, 1439, 1440);
+    	System.out.println(g.getPrecomputedBin());
+    	System.out.println(g.getPrecomputedBin());
+    	System.out.println(g.getPrecomputedBin());
+    	System.out.println(g.getPrecomputedBin());
+    	System.out.println(g.getPrecomputedBin());
+    	System.out.println("Testing duration.");
+    	g = new Gaussian(240, 90);
+    	g.precompute(1, 1439, 1440);
+    	System.out.println(g.getPrecomputedBin());
+    	System.out.println(g.getPrecomputedBin());
+    	System.out.println(g.getPrecomputedBin());
+    	System.out.println(g.getPrecomputedBin());
+    	System.out.println(g.getPrecomputedBin());
+    }
+    
+    
 }

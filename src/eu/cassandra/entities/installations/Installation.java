@@ -1,9 +1,11 @@
 package eu.cassandra.entities.installations;
 
+import java.util.PriorityQueue;
 import java.util.Vector;
 
 import eu.cassandra.entities.appliances.Appliance;
 import eu.cassandra.entities.people.Person;
+import eu.cassandra.platform.Event;
 import eu.cassandra.platform.utilities.Registry;
 
 public class Installation {
@@ -41,24 +43,27 @@ public class Installation {
 		appliances = builder.appliances;
 		registry = builder.registry;
 	}
-
-	public void nextStep(long tick) {
-		for(Person person : getPersons()) {
-			person.nextStep(tick);
+    
+    public void updateDailySchedule(int tick, PriorityQueue<Event> queue) {
+    	for(Person person : getPersons()) {
+    		person.updateDailySchedule(tick, queue);
 		}
+    }
+
+	public void nextStep(int tick) {
 		updateRegistry(tick);
 	}
 
-	public void updateRegistry(long tick) {
-		double power = 0.0;
+	public void updateRegistry(int tick) {
+		float power = 0f;
 		for(Appliance appliance : getAppliances()) {
 			power += appliance.getPower(tick);
 		}
-		getRegistry().add(power);
+		getRegistry().setValue(tick, power);
 	}
 
-	public double getCurrentPower() {
-		return getRegistry().getCurrentValue();
+	public float getPower(int tick) {
+		return getRegistry().getValue(tick);
 	}
 	
     public int getId() {
@@ -87,5 +92,12 @@ public class Installation {
 
     public void addAppliance(Appliance appliance) {
         this.appliances.add(appliance);
+    }
+    
+    public Appliance applianceExists(String name) {
+    	for(Appliance a : appliances) {
+    		if(a.getName().equalsIgnoreCase(name)) return a;
+    	}
+    	return null;
     }
 }

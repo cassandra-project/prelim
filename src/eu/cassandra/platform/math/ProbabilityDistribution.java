@@ -80,4 +80,12 @@ public interface ProbabilityDistribution {
      * this function returns -1.
      */
     public double getPrecomputedProbability(double x);
+    
+    /**
+     * Gets a random integer between 0 and the number of nBins.
+     * 
+     * @return A random integer following the distribution of the precomputed 
+     * histogram 
+     */
+    public int getPrecomputedBin();
 }
