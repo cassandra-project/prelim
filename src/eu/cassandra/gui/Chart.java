@@ -25,6 +25,7 @@ import org.jfree.chart.axis.DateTickUnitType;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.DefaultDrawingSupplier;
 import org.jfree.chart.plot.DrawingSupplier;
+import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.time.RegularTimePeriod;
@@ -39,7 +40,7 @@ import org.jfree.data.xy.XYDataset;
 public class Chart {
 
 	private static Logger logger = Logger.getLogger(Chart.class);
-	private Font font = new Font("Arial",Font.BOLD,25);
+//	private Font font = new Font("Arial",Font.BOLD,25);
 
 	/**
 	 * Creates a chart.
@@ -48,88 +49,37 @@ public class Chart {
 	 * 
 	 * @return a chart.
 	 */
-	public JFreeChart createChart(String title, final XYDataset dataset,int year,String collection) {
-		Calendar maxDateC = Calendar.getInstance();
-		if(collection.equalsIgnoreCase("SS")) {
-			maxDateC.set(Calendar.YEAR, year);
-			maxDateC.set(Calendar.MONTH, 10);
-		}
-		else if(collection.equalsIgnoreCase("AW")) {
-			maxDateC.set(Calendar.YEAR, year+1);
-			maxDateC.set(Calendar.MONTH, 4);
-		}
+	public JFreeChart createChart(String title, final XYDataset dataset) {
 		final JFreeChart chart = ChartFactory.createTimeSeriesChart(
 				title, 
-				"Date", 
-				"Counts",
+				"Time", 
+				"Consumption (W)",
 				dataset, 
 				true, 
 				true, 
-				false
+				true
 		);
-		chart.getLegend().setItemFont(font);
-		final XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
-		renderer.setSeriesLinesVisible(0, true);
-		renderer.setSeriesShapesVisible(0, true);
-		renderer.setSeriesPaint(0, Color.RED);
-		//renderer.setSeriesPaint(1, Color.BLUE);
-
-		BasicStroke basicStroke = new BasicStroke(4f);
-		renderer.setSeriesStroke(0, basicStroke);
+////		chart.getLegend().setItemFont(font);
+//		final XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
+//		renderer.setSeriesLinesVisible(0, true);
+//		renderer.setSeriesShapesVisible(0, true);
+//		renderer.setSeriesPaint(0, Color.RED);
+//		renderer.setSeriesStroke(0, new BasicStroke(4f));
 
 		DateAxis axis = (DateAxis) chart.getXYPlot().getDomainAxis();
-		axis.setDateFormatOverride(new SimpleDateFormat("MM/yy"));//MMM/yy
-		axis.setTickLabelFont(font);
-		axis.setLabelFont(font);
-		if(year > 0)
-			axis.setMaximumDate(maxDateC.getTime());
+		axis.setDateFormatOverride(new SimpleDateFormat("mm:HH dd/MM"));//MMM/yy
 
-		XYPlot axisY = chart.getXYPlot();
-		ValueAxis valueAxis = axisY.getRangeAxis();
-		//valueAxis.setTickLabelFont(font);
-		//valueAxis.setLabelFont(font);
+//		XYPlot axisY = chart.getXYPlot();
+//		ValueAxis valueAxis = axisY.getRangeAxis();
 
-		DateTickUnit unit = new DateTickUnit(DateTickUnitType.MONTH,1);
-		axis.setTickUnit(unit);
-
-		for(int i = 1; i < chart.getXYPlot().getDataset().getSeriesCount(); i++) {
-			renderer.setSeriesLinesVisible(i, true);
-			renderer.setSeriesShapesVisible(i, true);
-			renderer.setSeriesStroke(i, basicStroke);
-			//renderer.setSeriesPaint(i, Color.YELLOW);
-		}
-		//chart.getXYPlot().setRenderer(renderer);
 		chart.setAntiAlias(true);
 		chart.setTextAntiAlias(true);
 
-		renderer.setSeriesPaint(chart.getXYPlot().getDataset().getSeriesCount()-1,Color.BLUE);
-
-		//shape sizes (code from DefaultDrawingSupplier):
-		double size = 10;
-		double delta = size / 2.0;
-		Shape[] shapes = new Shape[1];
-		shapes[0] = new Rectangle2D.Double(-delta, -delta, size, size); //square
-
-		DrawingSupplier ds = new DefaultDrawingSupplier(
-				DefaultDrawingSupplier.DEFAULT_PAINT_SEQUENCE, 
-				DefaultDrawingSupplier.DEFAULT_OUTLINE_PAINT_SEQUENCE, 
-				DefaultDrawingSupplier.DEFAULT_STROKE_SEQUENCE, 
-				DefaultDrawingSupplier.DEFAULT_OUTLINE_STROKE_SEQUENCE, 
-				shapes);
-		chart.getPlot().setDrawingSupplier(ds);
+		//renderer.setSeriesPaint(chart.getXYPlot().getDataset().getSeriesCount()-1,Color.BLUE);
 
 		return chart;
 	}
 
-	/**
-	 * 
-	 * @param title
-	 * @param dataset
-	 * @return
-	 */
-	public JFreeChart createChart(String title, final XYDataset dataset) {
-		return createChart(title, dataset,-1,"");
-	}
 
 	/**
 	 * Creates a sample dataset.
@@ -249,18 +199,18 @@ public class Chart {
 	 * @param dataset
 	 * @param title
 	 */
-	public void saveJChart(String title,JFreeChart chart) {
-		try {
-			String fileName = title +  ".jpg";
-			File file = new File(fileName);
-			file.createNewFile();
-			ChartUtilities.saveChartAsJPEG(file, chart, 3000, 1500);
-		} catch (IOException e) {
-			logger.error(e.getMessage());
-			e.printStackTrace();
-		}
-
-	}
+//	public void saveJChart(String title,JFreeChart chart) {
+//		try {
+//			String fileName = title +  ".jpg";
+//			File file = new File(fileName);
+//			file.createNewFile();
+//			ChartUtilities.saveChartAsJPEG(file, chart, 3000, 1500);
+//		} catch (IOException e) {
+//			logger.error(e.getMessage());
+//			e.printStackTrace();
+//		}
+//
+//	}
 
 
 

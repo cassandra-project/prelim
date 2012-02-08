@@ -12,6 +12,7 @@ public class Platform {
     public static void main(String[] args) {
     	RNG.init();
         Observer observer = new Observer();
+        observer.setup();
         observer.simulate();
         observer.flush();
     }

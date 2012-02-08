@@ -30,7 +30,7 @@ public class Observer implements Runnable {
 	
 	static Logger logger = Logger.getLogger(Observer.class);
 
-	private Vector<Installation> installations = new Vector<Installation>();
+	public static Vector<Installation> installations = new Vector<Installation>();
 	
 	private PriorityQueue<Event> queue;
 
@@ -42,8 +42,6 @@ public class Observer implements Runnable {
 
 	public Observer() {
 		PropertyConfigurator.configure(Params.LOG_CONFIG_FILE);
-		// Setup simulation
-		setup();
 	}
 
 	public void simulate() {
@@ -102,7 +100,7 @@ public class Observer implements Runnable {
 		registry.saveRegistry(folder);
 	}
 	
-	private void setup() {
+	public void setup() {
 		logger.info("Simulation setup started.");
 		// Initialize simulation variables
 		int numOfDays = FileUtils.getInt(Params.SIM_PROPS, "days");
