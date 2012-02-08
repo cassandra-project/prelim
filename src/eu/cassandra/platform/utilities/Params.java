@@ -20,4 +20,5 @@ public abstract class Params {
 	
 	public final static String REGISTRIES_DIR = "registries/";
 
+	public final static String JAVADB_PROPS = "props/javaDB.props";
 }

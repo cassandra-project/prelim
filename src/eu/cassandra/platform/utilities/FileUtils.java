@@ -131,6 +131,15 @@ public abstract class FileUtils {
 		return arr;
 	}
 	
+	public static String getString(String propsFile, String key) {
+		return getString(loadProperties(propsFile), key);
+	}
+	
+	public static String getString(Properties props, String key) {
+		String s = props.getProperty(key);
+		return s;
+	}
+	
 	/**
 	 * Create folder structure
 	 * 
