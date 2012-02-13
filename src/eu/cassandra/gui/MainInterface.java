@@ -14,7 +14,6 @@ import org.jfree.data.xy.XYDataset;
 import eu.cassandra.entities.installations.Installation;
 import eu.cassandra.platform.Observer;
 import eu.cassandra.platform.utilities.Params;
-import eu.cassandra.platform.utilities.RNG;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -107,7 +106,7 @@ public class MainInterface implements Runnable {
 			startButton.setEnabled(false);	
 			installationCombo.setEnabled(false);
 			obs = new Observer();
-			Thread t = new Thread(gui);
+			Thread t = new Thread(MainInterface.this);
 			t.start();
 		}
 	}
@@ -269,14 +268,4 @@ public class MainInterface implements Runnable {
 	}
 
 
-	private static MainInterface gui = null;
-	/**
-	 * 
-	 * @param args
-	 */
-	 public static void main(String args[]){
-		RNG.init();
-		gui = new MainInterface();
-		gui.launchFrame();
-	 }
 }
