@@ -1,7 +1,7 @@
 package eu.cassandra.entities.installations;
 
-import java.util.PriorityQueue;
 import java.util.Vector;
+import java.util.concurrent.PriorityBlockingQueue;
 
 import eu.cassandra.entities.appliances.Appliance;
 import eu.cassandra.entities.people.Person;
@@ -44,7 +44,7 @@ public class Installation {
 		registry = builder.registry;
 	}
     
-    public void updateDailySchedule(int tick, PriorityQueue<Event> queue) {
+    public void updateDailySchedule(int tick,  PriorityBlockingQueue<Event> queue) {
     	for(Person person : getPersons()) {
     		person.updateDailySchedule(tick, queue);
 		}

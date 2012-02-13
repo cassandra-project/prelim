@@ -1,7 +1,7 @@
 package eu.cassandra.entities.people;
 
-import java.util.PriorityQueue;
 import java.util.Vector;
+import java.util.concurrent.PriorityBlockingQueue;
 
 import eu.cassandra.platform.Event;
 import eu.cassandra.entities.installations.Installation;
@@ -43,7 +43,7 @@ public class Person {
     	activities.add(a);
     }
     
-    public void updateDailySchedule(int tick, PriorityQueue<Event> queue) {
+    public void updateDailySchedule(int tick,  PriorityBlockingQueue<Event> queue) {
     	for(Activity activity : activities) {
     		activity.updateDailySchedule(tick, queue);
 		}

@@ -1,8 +1,8 @@
 package eu.cassandra.entities.people;
 
 import java.util.HashMap;
-import java.util.PriorityQueue;
 import java.util.Vector;
+import java.util.concurrent.PriorityBlockingQueue;
 
 import org.apache.log4j.Logger;
 
@@ -79,7 +79,7 @@ public class Activity {
     	return name;
     }
     
-    public void updateDailySchedule(int tick, PriorityQueue<Event> queue) {
+    public void updateDailySchedule(int tick,  PriorityBlockingQueue<Event> queue) {
     	/*
     	 *  Decide on the number of times the activity is going to be activated
     	 *  during a day

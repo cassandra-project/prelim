@@ -2,8 +2,8 @@ package eu.cassandra.platform;
 
 import java.io.File;
 import java.util.Calendar;
-import java.util.PriorityQueue;
 import java.util.Vector;
+import java.util.concurrent.PriorityBlockingQueue;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
@@ -32,7 +32,7 @@ public class Observer implements Runnable {
 
 	public static Vector<Installation> installations = new Vector<Installation>();
 	
-	private PriorityQueue<Event> queue;
+	private  PriorityBlockingQueue<Event> queue;
 
 	private int tick = 0;
 
@@ -54,7 +54,7 @@ public class Observer implements Runnable {
         }	
 	}
 
-	public void run() {
+	public  void run() {
 		while(tick < endTick) {
 			if(tick % Constants.MIN_IN_DAY == 0) {
 				logger.info("Day " + ((tick / Constants.MIN_IN_DAY) + 1));
@@ -108,7 +108,7 @@ public class Observer implements Runnable {
 				FileUtils.getInt(Params.SIM_PROPS, "installations");
 		endTick = Constants.MIN_IN_DAY * numOfDays;
 		registry = new Registry("sim", endTick);
-		queue = new PriorityQueue<Event>(2 * numOfInstallations);
+		queue = new  PriorityBlockingQueue<Event>(2 * numOfInstallations);
 		
 		// Read the different kinds of appliances
 		String[] appliances = 

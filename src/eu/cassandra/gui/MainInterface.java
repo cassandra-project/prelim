@@ -2,11 +2,14 @@ package eu.cassandra.gui;
 
 import javax.swing.*;
 
+import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.DateAxis;
 import org.jfree.data.time.Minute;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
+import org.jfree.data.xy.XYDataset;
 
 import eu.cassandra.entities.installations.Installation;
 import eu.cassandra.platform.Observer;
@@ -14,6 +17,8 @@ import eu.cassandra.platform.utilities.RNG;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 /**
@@ -29,10 +34,12 @@ public class MainInterface implements Runnable {
 	private JPanel buttonPanel = new JPanel();  
 	private JScrollPane buttonScrollPane = new JScrollPane(buttonPanel);
 	private JScrollPane graphScrollPane;
-	// Buttons some there is something to put in the panels
+
+	private JTextField projectFileField = new JTextField("Select project file");
 	private JButton startButton = new JButton("Start");
 	private JButton exitButton = new JButton("Exit");
 	private JComboBox installationCombo = new JComboBox();
+
 	// Menu
 	private JMenuBar menuBar = new JMenuBar(); // Menubar
 	private JMenu menuFile = new JMenu("File"); // File Entry on Menu bar
@@ -50,6 +57,9 @@ public class MainInterface implements Runnable {
 
 		startButton.addActionListener(new ListenStartButton());
 		exitButton.addActionListener(new ListenExitButton());
+		projectFileField.addMouseListener(new ListenProjectFileField());
+
+		projectFileField.setEditable(false);
 
 		f.setJMenuBar(menuBar);
 
@@ -61,11 +71,11 @@ public class MainInterface implements Runnable {
 
 		TimeSeries series = new TimeSeries("");
 		dataset = new TimeSeriesCollection(series);
-		Chart c = new Chart();
-		JFreeChart chart = c.createChart("Consumption of: 1", dataset);
+		JFreeChart chart = createChart("Consumption of: 1", dataset);
 		ChartPanel chartPanel = new ChartPanel(chart); 
 		graphScrollPane = new JScrollPane(chartPanel);
 
+		buttonPanel.add(projectFileField);
 		buttonPanel.add(startButton);
 		buttonPanel.add(installationCombo);
 		buttonPanel.add(exitButton);
@@ -83,6 +93,7 @@ public class MainInterface implements Runnable {
 	public class ListenStartButton implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 			startButton.setEnabled(false);	
+			installationCombo.setEnabled(false);
 			obs = new Observer();
 			Thread t = new Thread(gui);
 			t.start();
@@ -97,6 +108,27 @@ public class MainInterface implements Runnable {
 			installationCombo.addItem(inst.getId());
 		}
 		startButton.setEnabled(true);	
+		installationCombo.setEnabled(true);
+	}
+
+	public JFreeChart createChart(String title, final XYDataset dataset) {
+		final JFreeChart chart = ChartFactory.createTimeSeriesChart(
+				title, 
+				"Time", 
+				"Consumption (W)",
+				dataset, 
+				false, 
+				true, 
+				true
+		);
+
+		DateAxis axis = (DateAxis) chart.getXYPlot().getDomainAxis();
+		axis.setDateFormatOverride(new SimpleDateFormat("mm:HH dd/MM"));//MMM/yy
+
+		chart.setAntiAlias(true);
+		chart.setTextAntiAlias(true);
+
+		return chart;
 	}
 
 	public class ListenInstallationComboBox implements ActionListener {
@@ -131,6 +163,43 @@ public class MainInterface implements Runnable {
 			dataset.addSeries(series);
 		}
 	}
+
+	public class ListenProjectFileField  implements MouseListener {
+		public void mousePressed(MouseEvent e) {
+			JFileChooser fc = new JFileChooser();
+			fc.setCurrentDirectory(new File(System.getProperty("user.dir")));
+			
+			CassandraProjectFileFilter filter = new CassandraProjectFileFilter();
+			fc.setFileFilter(filter);
+			int returnVal = fc.showOpenDialog(f);
+			if(returnVal == JFileChooser.APPROVE_OPTION) {
+				System.out.println("You chose to open this file: " + fc.getSelectedFile().getName());
+			}
+		}
+
+		@Override
+		public void mouseClicked(MouseEvent arg0) {
+
+		}
+
+		@Override
+		public void mouseEntered(MouseEvent arg0) {
+
+		}
+
+		@Override
+		public void mouseExited(MouseEvent arg0) {
+
+		}
+
+		@Override
+		public void mouseReleased(MouseEvent arg0) {
+
+		}
+
+
+	}
+
 
 	public class ListenExitButton implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
