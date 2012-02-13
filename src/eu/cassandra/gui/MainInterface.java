@@ -13,11 +13,15 @@ import org.jfree.data.xy.XYDataset;
 
 import eu.cassandra.entities.installations.Installation;
 import eu.cassandra.platform.Observer;
+import eu.cassandra.platform.utilities.Params;
 import eu.cassandra.platform.utilities.RNG;
 
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
@@ -35,6 +39,9 @@ public class MainInterface implements Runnable {
 	private JScrollPane buttonScrollPane = new JScrollPane(buttonPanel);
 	private JScrollPane graphScrollPane;
 
+	private JTextArea logTextArea = new JTextArea();
+	private JScrollPane logTextAreaScrollPane = new JScrollPane(logTextArea);
+
 	private JTextField projectFileField = new JTextField("Select project file");
 	private JButton startButton = new JButton("Start");
 	private JButton exitButton = new JButton("Exit");
@@ -51,7 +58,7 @@ public class MainInterface implements Runnable {
 	 * 
 	 */
 	public MainInterface(){
-
+		redirectSystemStreams();
 		installationCombo.addActionListener(new ListenInstallationComboBox());
 		installationCombo.setPreferredSize(new Dimension(300, 20));
 
@@ -59,6 +66,10 @@ public class MainInterface implements Runnable {
 		exitButton.addActionListener(new ListenExitButton());
 		projectFileField.addMouseListener(new ListenProjectFileField());
 
+		logTextAreaScrollPane.setPreferredSize(new Dimension(600, 500));
+
+		projectFileField.setPreferredSize(new Dimension(600, 20));
+		projectFileField.setText(Params.SIM_PROPS);
 		projectFileField.setEditable(false);
 
 		f.setJMenuBar(menuBar);
@@ -83,6 +94,7 @@ public class MainInterface implements Runnable {
 		f.getContentPane().setLayout(new BorderLayout());
 		f.getContentPane().add(graphScrollPane, BorderLayout.CENTER);
 		f.getContentPane().add(buttonScrollPane, BorderLayout.SOUTH);
+		f.getContentPane().add(logTextAreaScrollPane, BorderLayout.EAST);
 
 		f.addWindowListener(new ListenCloseWdw());
 		menuItemQuit.addActionListener(new ListenMenuQuit());
@@ -168,7 +180,7 @@ public class MainInterface implements Runnable {
 		public void mousePressed(MouseEvent e) {
 			JFileChooser fc = new JFileChooser();
 			fc.setCurrentDirectory(new File(System.getProperty("user.dir")));
-			
+
 			CassandraProjectFileFilter filter = new CassandraProjectFileFilter();
 			fc.setFileFilter(filter);
 			int returnVal = fc.showOpenDialog(f);
@@ -222,18 +234,49 @@ public class MainInterface implements Runnable {
 	public void launchFrame(){
 		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		f.setVisible(true);
-		f.setPreferredSize(new Dimension(1000,700));
+		f.setPreferredSize(new Dimension(1600,1000));
 		f.pack();
 	}
+
+	private void updateTextArea(final String text) {
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				logTextArea.append(text);
+			}
+		});
+	}
+
+	private void redirectSystemStreams() {
+		OutputStream out = new OutputStream() {
+			@Override
+			public void write(int b) throws IOException {
+				updateTextArea(String.valueOf((char) b));
+			}
+
+			@Override
+			public void write(byte[] b, int off, int len) throws IOException {
+				updateTextArea(new String(b, off, len));
+			}
+
+			@Override
+			public void write(byte[] b) throws IOException {
+				write(b, 0, b.length);
+			}
+		};
+
+		System.setOut(new PrintStream(out, true));
+		System.setErr(new PrintStream(out, true));
+	}
+
 
 	private static MainInterface gui = null;
 	/**
 	 * 
 	 * @param args
 	 */
-	public static void main(String args[]){
+	 public static void main(String args[]){
 		RNG.init();
 		gui = new MainInterface();
 		gui.launchFrame();
-	}
+	 }
 }
