@@ -57,7 +57,7 @@ public class MainInterface implements Runnable {
 	 * 
 	 */
 	public MainInterface(){
-		redirectSystemStreams();
+		//redirectSystemStreams();
 		installationCombo.addActionListener(new ListenInstallationComboBox());
 		installationCombo.setPreferredSize(new Dimension(300, 20));
 
