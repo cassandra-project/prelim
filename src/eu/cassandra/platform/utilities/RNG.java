@@ -37,12 +37,22 @@ public class RNG {
 		return random.nextInt(n);
 	}
 	
+	public static long nextLong() {
+		return random.nextLong();
+	}
+	
 	public static double nextDouble() {
 		return random.nextDouble();
 	}
 	
 	public static double nextDoublePlusMinus() {
 		return 2 * random.nextDouble() - 1;
+	}
+	
+	public static void main(String[] args) {
+		RNG.init();
+		System.out.println(RNG.nextLong());
+		System.out.println(RNG.nextInt());
 	}
 	
 }

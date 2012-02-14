@@ -1,31 +1,25 @@
 package eu.cassandra.platform.utilities;
 
-import java.util.Vector;
-
-import eu.cassandra.entities.installations.Installation;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
 /**
- * Stores double numbers sequentially (i.e. time series) in a Vector class with
- * operations:
- * <li>
- * <ul>Add a value.</ul>
- * <ul>Select values between time ticks.</ul>
- * <ul>Calculate the mean between time ticks.</ul>
- * <ul>Calculate the standard deviation between time ticks.</ul>
- * </li> 
+ * Stores float numbers in an array along with some statistical capabilities.
  * 
  * @author Cassandra developers
- * 
- * TODO make it agnostic of any Cassandra semantics i.e. CO2
+ * @version prelim
  */
 public class Registry {
 
 	private String name;
 
-	private Vector<Double> values = new Vector<Double>();
+	private float[] values;
 
-	public Registry(String aName) {
+	public Registry(String aName, int size) {
 		name = aName;
+		values = new float[size];
 	}
 
 	public String getName() {
@@ -36,49 +30,53 @@ public class Registry {
 		name = s;
 	}
 
-	public double getCurrentValue() {
-		return values.lastElement().doubleValue();
-	}
-
-	public void setCurrentValue(double value) {
-		values.add(new Double(value));
-	}
-
-	public double getValue(int tick) {
-		return values.get(tick).doubleValue();
+	public float getValue(int tick) {
+		return values[tick];
 	}
 	
-	public Vector<Double> getValues() {
+	public float[] getValues() {
 		return values;
 	}
 
-	public void setValue(int tick, double value) {
-		values.set(tick, new Double(value));
+	public void setValue(int tick, float value) {
+		values[tick] = value;
 	}
 
 	public double getMean(int startTick, int endTick) {
 		double mean = 0.0;
-		for (int i = 0; i < values.size(); i ++) {
-			mean += values.get(i);
+		for (int i = startTick; i <= endTick; i ++) {
+			mean += values[i];
 		}
-		mean /= values.size();
+		mean /= (endTick - startTick + 1);
 		return mean;
 	}
 
 	public double getVariance(int startTick, int endTick) {
 		double var = 0.0;
 		double mean = getMean(startTick, endTick);
-
-		for (int i = 0; i < values.size(); i ++) {
-			var += (values.get(i) - mean) * (values.get(i) - mean);
+		for (int i = startTick; i <= endTick; i ++) {
+			var += (values[i] - mean) * (values[i] - mean);
 		}
-		var /= values.size();
+		var /= (endTick - startTick + 1);
 		return var;
 	}
-
-	/* setCurrentValue() with a simpler name. */
-	public void add(double value) {
-		setCurrentValue(value);
+	
+	public void saveRegistry(File parrentFolder) {
+		try {
+			File file = new File(parrentFolder.getPath() + "/" + 
+					getName() + ".csv");
+			FileWriter fileWriter = new FileWriter(file);
+			BufferedWriter bufWriter = new BufferedWriter(fileWriter);
+			for(int i =0; i< values.length; i++) {
+				bufWriter.write(i + "," + values[i]);
+				bufWriter.newLine();
+			}
+			bufWriter.flush();
+			bufWriter.close();
+			fileWriter.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 }
