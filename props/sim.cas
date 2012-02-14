@@ -3,5 +3,5 @@ appliancesFile = props/appliances.props
 demographicsFile = props/demographics.props
 javaDBFile = props/javaDB.props
 
-days = 7
-installations = 100
+days = 10
+installations = 1

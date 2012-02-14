@@ -1,18 +1,19 @@
-package eu.cassandra.gui;
-
-import javax.swing.*;
+package eu.cassandra.platform.gui;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
+import org.jfree.chart.axis.DateTickMarkPosition;
+import org.jfree.chart.axis.DateTickUnit;
+import org.jfree.chart.axis.DateTickUnitType;
 import org.jfree.data.time.Minute;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.data.xy.XYDataset;
 
 import eu.cassandra.entities.installations.Installation;
-import eu.cassandra.platform.Observer;
+import eu.cassandra.platform.Simulation;
 import eu.cassandra.platform.utilities.Params;
 
 import java.awt.*;
@@ -23,16 +24,18 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
+
+import javax.swing.*;
 
 /**
  * 
- * @author Konstantinos N. Vavliakis (kvavliak@issel.ee.auth.gr)
+ * @author Konstantinos N. Vavliakis (kvavliak [at] iti [dot] gr)
  *
  */
-public class MainInterface implements Runnable {
-
-	private TimeSeriesCollection dataset;
-	// Initialize all swing objects.
+public class GUI implements Runnable {
+	
+	// Initialize all swing objects
 	private JFrame f = new JFrame("Cassanda GUI"); 
 	private JPanel buttonPanel = new JPanel();  
 	private JScrollPane buttonScrollPane = new JScrollPane(buttonPanel);
@@ -45,6 +48,7 @@ public class MainInterface implements Runnable {
 	private JButton startButton = new JButton("Start");
 	private JButton exitButton = new JButton("Exit");
 	private JComboBox installationCombo = new JComboBox();
+	private ListenInstallationComboBox a;
 
 	// Menu
 	private JMenuBar menuBar = new JMenuBar(); // Menubar
@@ -52,20 +56,23 @@ public class MainInterface implements Runnable {
 	private JMenuItem menuItemQuit = new JMenuItem("Quit"); // Quit sub item
 	private JMenu menuHelp = new JMenu("Help"); // Help Menu entry
 	private JMenuItem menuItemAbout = new JMenuItem("About"); // About Entry
+	
+	// Graph related variables
+	private TimeSeriesCollection dataset;
+	
+	// Simulation related variables
+	private Simulation sim = null;
 
-	/**
-	 * 
-	 */
-	public MainInterface(){
+	public GUI(){
 		//redirectSystemStreams();
-		installationCombo.addActionListener(new ListenInstallationComboBox());
+		a =  new ListenInstallationComboBox();
 		installationCombo.setPreferredSize(new Dimension(300, 20));
 
 		startButton.addActionListener(new ListenStartButton());
 		exitButton.addActionListener(new ListenExitButton());
 		projectFileField.addMouseListener(new ListenProjectFileField());
 
-		logTextAreaScrollPane.setPreferredSize(new Dimension(600, 500));
+		logTextAreaScrollPane.setPreferredSize(new Dimension(400, 500));
 
 		projectFileField.setPreferredSize(new Dimension(600, 20));
 		projectFileField.setText(Params.SIM_PROPS);
@@ -81,7 +88,7 @@ public class MainInterface implements Runnable {
 
 		TimeSeries series = new TimeSeries("");
 		dataset = new TimeSeriesCollection(series);
-		JFreeChart chart = createChart("Consumption of: 1", dataset);
+		JFreeChart chart = createChart("Consumption", dataset);
 		ChartPanel chartPanel = new ChartPanel(chart); 
 		graphScrollPane = new JScrollPane(chartPanel);
 
@@ -99,26 +106,28 @@ public class MainInterface implements Runnable {
 		menuItemQuit.addActionListener(new ListenMenuQuit());
 	}
 
-	Observer obs = null;
-
 	public class ListenStartButton implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
-			startButton.setEnabled(false);	
-			installationCombo.setEnabled(false);
-			obs = new Observer();
-			Thread t = new Thread(MainInterface.this);
+			sim = new Simulation();
+			Thread t = new Thread(GUI.this);
 			t.start();
 		}
 	}
 
 	public void run() {
-		obs.setup();
-		obs.simulate();
+		startButton.setEnabled(false);	
+		installationCombo.setEnabled(false);
+		installationCombo.removeActionListener(a);
+		installationCombo.removeAllItems();
+		sim.setup();
+		sim.simulate();
 		installationCombo.addItem("All installations");
-		for(Installation inst : Observer.installations) {
+		for(Installation inst : sim.getInstallations()) {
 			installationCombo.addItem(inst.getId());
 		}
-		startButton.setEnabled(true);	
+		installationCombo.addActionListener(a);
+		installationCombo.setSelectedIndex(0);
+		startButton.setEnabled(true);
 		installationCombo.setEnabled(true);
 	}
 
@@ -134,7 +143,9 @@ public class MainInterface implements Runnable {
 		);
 
 		DateAxis axis = (DateAxis) chart.getXYPlot().getDomainAxis();
-		axis.setDateFormatOverride(new SimpleDateFormat("mm:HH dd/MM"));//MMM/yy
+		axis.setTickUnit(new DateTickUnit(DateTickUnitType.DAY,1));
+		axis.setTickMarkPosition(DateTickMarkPosition.START);
+		axis.setDateFormatOverride(new SimpleDateFormat("dd"));
 
 		chart.setAntiAlias(true);
 		chart.setTextAntiAlias(true);
@@ -144,33 +155,27 @@ public class MainInterface implements Runnable {
 
 	public class ListenInstallationComboBox implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
-			TimeSeries	series = new TimeSeries("");
-			//series.clear();
+			TimeSeries series = new TimeSeries("");
 			Calendar cal = Calendar.getInstance();
-			Minute minute = new Minute();
-			minute.peg(cal);
-			if(installationCombo.getSelectedIndex() == 0){
-				if(Observer.installations.size() > 0) {
-					for(int i=0; i <Observer.installations.get(0).getRegistry().getValues().length;i++ ) {
-						float mean = 0;
-						for(Installation inst: Observer.installations) {
-							mean += inst.getRegistry().getValues()[i];
-						}		
-						//mean /= Observer.installations.size();
-						minute = new Minute(minute.next().getStart());
-						series.add(minute, mean);
-					}
+			cal.clear();
+			cal.set(Calendar.YEAR, 2012);
+			cal.set(Calendar.MONTH, Calendar.JANUARY);
+			cal.set(Calendar.DAY_OF_MONTH, 1);
+			System.out.println(cal);
+			Minute minute = new Minute(cal.getTime());
+//			minute.peg(cal);
+			double value = 0;
+			for(int i = 0; i < sim.getEndTick()-1; i++) {
+				if(installationCombo.getSelectedIndex() == 0) {
+					value = sim.getRegistry().getValue(i);
+				} else {
+					Installation inst = sim.getInstallation(installationCombo.getSelectedIndex()-1);
+					value = inst.getRegistry().getValue(i);
 				}
+				minute = new Minute(minute.next().getStart());
+				series.add(minute, value);
 			}
-			else{
-				Installation inst = Observer.installations.get(installationCombo.getSelectedIndex()+1);
-				float[] values = inst.getRegistry().getValues();
-				for(int i =0; i<values.length;i++) {
-					minute = new Minute(minute.next().getStart());
-					series.add(minute, values[i]);
-				}
-			}
-			dataset.removeSeries(0);
+			if(!dataset.getSeries().isEmpty()) dataset.removeAllSeries();
 			dataset.addSeries(series);
 		}
 	}
@@ -179,7 +184,6 @@ public class MainInterface implements Runnable {
 		public void mousePressed(MouseEvent e) {
 			JFileChooser fc = new JFileChooser();
 			fc.setCurrentDirectory(new File(System.getProperty("user.dir")));
-
 			CassandraProjectFileFilter filter = new CassandraProjectFileFilter();
 			fc.setFileFilter(filter);
 			int returnVal = fc.showOpenDialog(f);
@@ -245,6 +249,9 @@ public class MainInterface implements Runnable {
 		});
 	}
 
+	/**
+	 * Redirects output streams to the GUI.
+	 */
 	private void redirectSystemStreams() {
 		OutputStream out = new OutputStream() {
 			@Override
@@ -262,7 +269,6 @@ public class MainInterface implements Runnable {
 				write(b, 0, b.length);
 			}
 		};
-
 		System.setOut(new PrintStream(out, true));
 		System.setErr(new PrintStream(out, true));
 	}

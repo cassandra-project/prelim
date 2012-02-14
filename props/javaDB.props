@@ -4,4 +4,4 @@ derby.driver=org.apache.derby.jdbc.EmbeddedDriver
 derby.url=jdbc:derby:
 db.table=ADDRESS
 db.schema=cassandraSchema
-db.data=CassandraData
+db.data=cassandraData

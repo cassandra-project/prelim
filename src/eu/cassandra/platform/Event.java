@@ -49,6 +49,7 @@ public class Event implements Comparable<Event> {
 				}
 				break;
 			case SWITCH_OFF:
+				System.out.println(app.getId() + " " + app.getName() + " " + app.getWho());
 				if(app.isInUse() && app.getWho().equalsIgnoreCase(hashcode)) {
 					app.turnOff();
 				} else if(!app.getWho().equalsIgnoreCase(hashcode)){

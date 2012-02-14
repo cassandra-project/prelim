@@ -1,4 +1,4 @@
-appliances=refrigerator,freezer,stove,oven,microwave-oven,toaster,coffee-maker,boiler,dishwasher,clothes-washer,tumble-dryer,iron,lighting,circulation-pump,space-heater,instant-water-heater,storage-water-heater,personal-computer,laptop,printer,vacuum,hairdryer,television,dvd-player,radio-player
+appliances=refrigerator,freezer,stove,oven,microwave,toaster,coffee-maker,boiler,dishwasher,clothes-washer,tumble-dryer,iron,lighting,circulation-pump,space-heater,instant-water-heater,storage-water-heater,personal-computer,laptop,printer,vacuum,hairdryer,television,dvd-player,radio-player
 
 refrigerator.power=110,0
 refrigerator.periods=10,30
@@ -20,10 +20,10 @@ oven.periods=1,1
 oven.stand-by=0
 oven.base=false
 
-microwave-oven.power=800
-microwave-oven.periods=6
-microwave-oven.stand-by=3
-microwave-oven.base=false
+microwave.power=800
+microwave.periods=6
+microwave.stand-by=3
+microwave.base=false
 
 toaster.power=660
 toaster.periods=10
@@ -34,8 +34,6 @@ coffee-maker.power=640,105
 coffee-maker.periods=6,18
 coffee-maker.stand-by=0
 coffee-maker.base=false
-# Maybe add this for the duration of an appliance in an activity
-#coffee-maker.typical-duration=30
 
 boiler.power=2000
 boiler.periods=5
@@ -46,7 +44,6 @@ dishwasher.power=50,2000,50,2000,250
 dishwasher.periods=15,15,45,15,30
 dishwasher.stand-by=0
 dishwasher.base=false
-#dishwasher.typical-duration=30
 
 clothes-washer.power=100,2000,900,100,250
 clothes-washer.periods=15,15,15,30,15
@@ -63,8 +60,8 @@ iron.periods=3,7
 iron.stand-by=0
 iron.base=false
 
-lighting.power=350
-lighting.periods=120
+lighting.power=350,700,175
+lighting.periods=120,120,120
 lighting.stand-by=0
 lighting.base=false
 
@@ -76,17 +73,17 @@ circulation-pump.base=true
 space-heater.power=8500,1000,8500
 space-heater.periods=105,1180,150
 space-heater.stand-by=0
-space-heater.base=false
+space-heater.base=true
 
 instant-water-heater.power=12000
 instant-water-heater.periods=15
 instant-water-heater.stand-by=0
 instant-water-heater.base=false
 
-storage-water-heater.power=3000,0,3000,0,30000
+storage-water-heater.power=3000,0,3000,0,3000
 storage-water-heater.periods=285,210,15,210,15
 storage-water-heater.stand-by=0
-storage-water-heater.base=false
+storage-water-heater.base=true
 
 personal-computer.power=150
 personal-computer.periods=60
