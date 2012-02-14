@@ -2,11 +2,11 @@ package eu.cassandra.platform;
 
 import java.io.File;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Vector;
 import java.util.concurrent.PriorityBlockingQueue;
 
 import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
 
 import eu.cassandra.entities.appliances.Appliance;
 import eu.cassandra.entities.installations.Installation;
@@ -21,27 +21,43 @@ import eu.cassandra.platform.utilities.Registry;
 import eu.cassandra.platform.utilities.FileUtils;
 
 /**
- * The Observer can simulate up to 4085 years of simulation.
+ * The Simulation class can simulate up to 4085 years of simulation.
  * 
- * @author kyrcha
+ * @author Kyriakos C. Chatzidimitriou (kyrcha [at] iti [dot] gr)
  *
  */
-public class Observer implements Runnable {
+public class Simulation implements Runnable {
 	
-	static Logger logger = Logger.getLogger(Observer.class);
+	static Logger logger = Logger.getLogger(Simulation.class);
 
-	public static Vector<Installation> installations = new Vector<Installation>();
+	private Vector<Installation> installations;
 	
-	private  PriorityBlockingQueue<Event> queue;
+	private PriorityBlockingQueue<Event> queue;
 
 	private int tick = 0;
 
 	private int endTick; 
 
 	private Registry registry;
-
-	public Observer() {
-		PropertyConfigurator.configure(Params.LOG_CONFIG_FILE);
+	
+	public Collection<Installation> getInstallations() {
+		return installations;
+	}
+	
+	public Installation getInstallation(int index) {
+		return installations.get(index);
+	}
+	
+	public int getCurrentTick() {
+		return tick;
+	}
+	
+	public int getEndTick() {
+		return endTick;
+	}
+	
+	public Registry getRegistry() {
+		return registry;
 	}
 
 	public void simulate() {
@@ -51,11 +67,12 @@ public class Observer implements Runnable {
 	        t.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }	
+        }
 	}
 
-	public  void run() {
+	public void run() {
 		while(tick < endTick) {
+			// If it is the beginning of the day create the events
 			if(tick % Constants.MIN_IN_DAY == 0) {
 				logger.info("Day " + ((tick / Constants.MIN_IN_DAY) + 1));
 				for(Installation installation : installations) {
@@ -64,13 +81,15 @@ public class Observer implements Runnable {
 				logger.info("Daily queue size: " + queue.size() + 
 						"(" + SimCalendar.isWeekend(tick) +")");
 			}
-			while(queue.peek().getTick() == tick) {
+			Event top = queue.peek();
+			while(top != null && top.getTick() == tick) {
 				Event e = queue.poll();
 				e.apply();
+				top = queue.peek();
 			}
 			/*
-			 *  Calculate the total power for this simulation step of all the
-			 *  installations 
+			 *  Calculate the total power for this simulation step for all the
+			 *  installations.
 			 */
 			float sumPower = 0;
 			for(Installation installation : installations) {
@@ -87,7 +106,7 @@ public class Observer implements Runnable {
 	}
 
 	/**
-	 * Flush the contents of registries to the file system.
+	 * Flush the contents of registers to the file system.
 	 */
 	public void flush() {
 		File folder = new File(Params.REGISTRIES_DIR + 
@@ -101,13 +120,14 @@ public class Observer implements Runnable {
 	}
 	
 	public void setup() {
+		installations = new Vector<Installation>();
 		logger.info("Simulation setup started.");
 		// Initialize simulation variables
 		int numOfDays = FileUtils.getInt(Params.SIM_PROPS, "days");
 		int numOfInstallations = 
 				FileUtils.getInt(Params.SIM_PROPS, "installations");
 		endTick = Constants.MIN_IN_DAY * numOfDays;
-		registry = new Registry("sim", endTick);
+		registry = new Registry("Total", endTick);
 		queue = new  PriorityBlockingQueue<Event>(2 * numOfInstallations);
 		
 		// Read the different kinds of appliances
@@ -123,7 +143,7 @@ public class Observer implements Runnable {
 		// Create the installations and put appliances inside
 		for(int i = 0; i < numOfInstallations; i++) {
 			// Make the installation
-			Installation inst = new Installation.Builder(i+"").
+			Installation inst = new Installation.Builder(i, i+"").
 					registry(new Registry(i+"", endTick)).build();
 			// Create the appliances
 			for(int j = 0; j < appliances.length; j++) {
@@ -143,7 +163,7 @@ public class Observer implements Runnable {
 		// Put persons inside installations along with activities
 		for(int i = 0; i < numOfInstallations; i++) {
 			Installation inst = installations.get(i);
-			int type = (RNG.nextInt() < 0.5) ? 1 : 2;
+			int type = RNG.nextInt(3) + 1;
 			Person person = 
 					new Person.Builder("Person " + i, type, inst).build();
 			inst.addPerson(person);
@@ -196,7 +216,7 @@ public class Observer implements Runnable {
 					ProbabilityDistribution weekend = new Gaussian(mu, sigma);
 					weekend.precompute(0, 3, 4);
 					
-					Activity a = new Activity.Builder(
+					Activity act = new Activity.Builder(
 							activities[j], 
 							start, 
 							duration).
@@ -204,9 +224,9 @@ public class Observer implements Runnable {
 							times("weekend", weekend).
 							build();
 					for(Appliance e : existing) {
-						a.addAppliance(e, 1.0);
+						act.addAppliance(e, 1.0 / existing.size());
 					}
-					person.addActivity(a);
+					person.addActivity(act);
 				}
 			}
 		}

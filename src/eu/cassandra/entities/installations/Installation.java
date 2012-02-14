@@ -16,7 +16,6 @@ public class Installation {
     private Registry registry;
     
     public static class Builder {
-    	private static int idCounter = 0;
     	// Required variables
     	private final int id;
         private final String name;
@@ -24,8 +23,8 @@ public class Installation {
         private Vector<Person> persons = new Vector<Person>();
         private Vector<Appliance> appliances = new Vector<Appliance>();
         private Registry registry = null;
-        public Builder(String aname) {
-        	id = idCounter++;
+        public Builder(int aid, String aname) {
+        	id = aid;
 			name = aname;
         }
         public Builder registry(Registry aregistry) {

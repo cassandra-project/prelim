@@ -18,7 +18,7 @@ public class Activity {
 	static Logger logger = Logger.getLogger(Activity.class);
 	
 	private final String name;
-	private final HashMap<String, ProbabilityDistribution> nTimesGivenWeakDay;
+	private final HashMap<String, ProbabilityDistribution> nTimesGivenDay;
 	private final ProbabilityDistribution probStartTime;
 	private final ProbabilityDistribution probDuration;
 	private Vector<Appliance> appliances;
@@ -26,7 +26,7 @@ public class Activity {
     public static class Builder {
     	// Required parameters
     	private final String name;
-    	private final HashMap<String, ProbabilityDistribution> nTimesGivenWeakDay;
+    	private final HashMap<String, ProbabilityDistribution> nTimesGivenDay;
     	private final ProbabilityDistribution probStartTime;
     	private final ProbabilityDistribution probDuration;
         // Optional parameters: not available    	
@@ -39,7 +39,7 @@ public class Activity {
         	probDuration = duration;
         	appliances = new Vector<Appliance>();
         	probApplianceUsed = new Vector<Double>();
-        	nTimesGivenWeakDay = new HashMap<String,ProbabilityDistribution>();
+        	nTimesGivenDay = new HashMap<String,ProbabilityDistribution>();
         }
         public Builder appliances(Appliance... apps) {
         	for(Appliance app : apps) {
@@ -48,7 +48,7 @@ public class Activity {
         	return this;
         }
         public Builder times(String day, ProbabilityDistribution timesPerDay) {
-        	nTimesGivenWeakDay.put(day, timesPerDay);
+        	nTimesGivenDay.put(day, timesPerDay);
         	return this;
         }
         public Builder applianceUsed(Double... probs) {
@@ -64,7 +64,7 @@ public class Activity {
     private Activity(Builder builder) {
     	name = builder.name;
     	appliances = builder.appliances;
-    	nTimesGivenWeakDay = builder.nTimesGivenWeakDay;
+    	nTimesGivenDay = builder.nTimesGivenDay;
     	probStartTime = builder.probStartTime;
     	probDuration = builder.probDuration;
     	probApplianceUsed = builder.probApplianceUsed;
@@ -86,9 +86,9 @@ public class Activity {
     	 */
     	ProbabilityDistribution numOfTimesProb;
     	if(SimCalendar.isWeekend(tick)) {
-    		numOfTimesProb = nTimesGivenWeakDay.get("weekend");
+    		numOfTimesProb = nTimesGivenDay.get("weekend");
     	} else {
-    		numOfTimesProb = nTimesGivenWeakDay.get("weekday");
+    		numOfTimesProb = nTimesGivenDay.get("weekday");
     	}
     	
     	int numOfTimes = numOfTimesProb.getPrecomputedBin();
@@ -96,8 +96,8 @@ public class Activity {
     	/*
     	 * Decide the duration and start time for each activity activation
     	 */
-    	for(int i = 1; i <= numOfTimes; i++) {
-    		int duration = probDuration.getPrecomputedBin();
+    	while(numOfTimes > 0) {
+    		int duration = Math.max(probDuration.getPrecomputedBin(), 1);
     		int startTime = probStartTime.getPrecomputedBin();
     		// Select appliances to be switched on
     		for(int j = 0; j < appliances.size(); j++) {
@@ -107,7 +107,7 @@ public class Activity {
     				int appStartTime = startTime;
     				String hash = 
     						Utils.hashcode((
-    								new Long(System.currentTimeMillis()).toString()));
+    								new Long(RNG.nextLong()).toString()));
     				Event eOn = 
     						new Event(tick + appStartTime, 
     								Event.SWITCH_ON, 
@@ -122,6 +122,7 @@ public class Activity {
     				queue.offer(eOff);
     			}
     		}
+    		numOfTimes--;
     	}
     }
     

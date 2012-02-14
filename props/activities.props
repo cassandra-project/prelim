@@ -1,91 +1,280 @@
-activities=breakfast,cooking,light-cooking,entertainment,cleaning
+activities=breakfast,cooking,light-cooking,entertainment,washing,dishwashing,personal-care,inhouse,chores
 
-breakfast.apps=coffee-maker,microwave
-breakfast.startTime.mu.1=540
+### Breakfast
+
+breakfast.apps=coffee-maker,toaster,boiler
+# 1 (College student)
+breakfast.startTime.mu.1=600
 breakfast.startTime.sigma.1=120
-breakfast.startTime.mu.2=540
-breakfast.startTime.sigma.2=120
 breakfast.duration.mu.1=30
 breakfast.duration.sigma.1=5
-breakfast.duration.mu.2=30
-breakfast.duration.sigma.2=5
 breakfast.weekday.mu.1=1
-breakfast.weekday.sigma.1=0.05
+breakfast.weekday.sigma.1=1
 breakfast.weekend.mu.1=1
-breakfast.weekend.sigma.1=0.05
+breakfast.weekend.sigma.1=1
+# 2 (Working)
+breakfast.startTime.mu.2=450
+breakfast.startTime.sigma.2=10
+breakfast.duration.mu.2=10
+breakfast.duration.sigma.2=1
 breakfast.weekday.mu.2=1
 breakfast.weekday.sigma.2=0.05
 breakfast.weekend.mu.2=1
 breakfast.weekend.sigma.2=0.05
+# 3 (Pensioner)
+breakfast.startTime.mu.3=450
+breakfast.startTime.sigma.3=120
+breakfast.duration.mu.3=30
+breakfast.duration.sigma.3=5
+breakfast.weekday.mu.3=1
+breakfast.weekday.sigma.3=0.05
+breakfast.weekend.mu.3=1
+breakfast.weekend.sigma.3=0.05
 
-cooking.apps=stove-oven,microwave
-cooking.startTime.mu.1=720
-cooking.startTime.sigma.1=360
+### Cooking
+
+cooking.apps=stove,oven
+# 1
+cooking.startTime.mu.1=1080
+cooking.startTime.sigma.1=120
+cooking.duration.mu.1=60
+cooking.duration.sigma.1=30
+cooking.weekday.mu.1=0
+cooking.weekday.sigma.1=1
+cooking.weekend.mu.1=0
+cooking.weekend.sigma.1=1
+# 2
 cooking.startTime.mu.2=1200
 cooking.startTime.sigma.2=60
-cooking.duration.mu.1=120
-cooking.duration.sigma.1=15
 cooking.duration.mu.2=60
 cooking.duration.sigma.2=10
-cooking.weekday.mu.1=2
-cooking.weekday.sigma.1=0.01
-cooking.weekend.mu.1=2
-cooking.weekend.sigma.1=0.01
 cooking.weekday.mu.2=1
 cooking.weekday.sigma.2=0.01
 cooking.weekend.mu.2=2
 cooking.weekend.sigma.2=0.01
+# 3
+cooking.startTime.mu.3=720
+cooking.startTime.sigma.3=300
+cooking.duration.mu.3=60
+cooking.duration.sigma.3=10
+cooking.weekday.mu.3=2
+cooking.weekday.sigma.3=0.01
+cooking.weekend.mu.3=2
+cooking.weekend.sigma.3=0.01
 
-light-cooking.apps=microwave,stove
-light-cooking.startTime.mu.1=1260
+### Light-Cooking
+
+light-cooking.apps=microwave
+# 1
+light-cooking.startTime.mu.1=1320
 light-cooking.startTime.sigma.1=60
-light-cooking.startTime.mu.2=780
-light-cooking.startTime.sigma.2=120
 light-cooking.duration.mu.1=30
 light-cooking.duration.sigma.1=5
-light-cooking.duration.mu.2=10
+light-cooking.weekday.mu.1=0
+light-cooking.weekday.sigma.1=1
+light-cooking.weekend.mu.1=0
+light-cooking.weekend.sigma.1=1
+# 2
+light-cooking.startTime.mu.2=1320
+light-cooking.startTime.sigma.2=120
+light-cooking.duration.mu.2=20
 light-cooking.duration.sigma.2=1
-light-cooking.weekday.mu.1=1
-light-cooking.weekday.sigma.1=0.01
-light-cooking.weekend.mu.1=1
-light-cooking.weekend.sigma.1=0.01
 light-cooking.weekday.mu.2=1
 light-cooking.weekday.sigma.2=0.01
 light-cooking.weekend.mu.2=0
 light-cooking.weekend.sigma.2=1
+# 3
+light-cooking.startTime.mu.3=1320
+light-cooking.startTime.sigma.3=120
+light-cooking.duration.mu.3=20
+light-cooking.duration.sigma.3=1
+light-cooking.weekday.mu.3=0
+light-cooking.weekday.sigma.3=0.01
+light-cooking.weekend.mu.3=0
+light-cooking.weekend.sigma.3=0.01
 
-entertainment.apps=dvd-player,personal-computer,television,radio-player
-entertainment.startTime.mu.1=720
+### Entertainment
+
+entertainment.apps=dvd-player,personal-computer,television,radio-player,laptop
+# 1
+entertainment.startTime.mu.1=1100
 entertainment.startTime.sigma.1=400
-entertainment.startTime.mu.2=1200
-entertainment.startTime.sigma.2=120
-entertainment.duration.mu.1=240
+entertainment.duration.mu.1=400
 entertainment.duration.sigma.1=90
-entertainment.duration.mu.2=120
-entertainment.duration.sigma.2=30
 entertainment.weekday.mu.1=1
 entertainment.weekday.sigma.1=0.01
 entertainment.weekend.mu.1=2
 entertainment.weekend.sigma.1=0.01
+# 2
+entertainment.startTime.mu.2=1200
+entertainment.startTime.sigma.2=120
+entertainment.duration.mu.2=120
+entertainment.duration.sigma.2=30
 entertainment.weekday.mu.2=1
 entertainment.weekday.sigma.2=0.01
 entertainment.weekend.mu.2=1
 entertainment.weekend.sigma.2=0.01
+# 3
+entertainment.startTime.mu.3=720
+entertainment.startTime.sigma.3=400
+entertainment.duration.mu.3=240
+entertainment.duration.sigma.3=90
+entertainment.weekday.mu.3=1
+entertainment.weekday.sigma.3=0.01
+entertainment.weekend.mu.3=2
+entertainment.weekend.sigma.3=0.01
 
-cleaning.apps=dishwasher,clothes-washer,tumble-dryer
-cleaning.startTime.mu.1=600
-cleaning.startTime.sigma.1=60
-cleaning.startTime.mu.2=1320
-cleaning.startTime.sigma.2=30
-cleaning.duration.mu.1=60
-cleaning.duration.sigma.1=15
-cleaning.duration.mu.2=90
-cleaning.duration.sigma.2=20
-cleaning.weekday.mu.1=1
-cleaning.weekday.sigma.1=0.5
-cleaning.weekend.mu.1=1
-cleaning.weekend.sigma.1=0.5
-cleaning.weekday.mu.2=1
-cleaning.weekday.sigma.2=0.5
-cleaning.weekend.mu.2=0
-cleaning.weekend.sigma.2=0.05
+### Washing
+
+washing.apps=clothes-washer,tumble-dryer
+# 1
+washing.startTime.mu.1=600
+washing.startTime.sigma.1=60
+washing.duration.mu.1=60
+washing.duration.sigma.1=15
+washing.weekday.mu.1=1
+washing.weekday.sigma.1=0.5
+washing.weekend.mu.1=1
+washing.weekend.sigma.1=0.5
+# 2
+washing.startTime.mu.2=1320
+washing.startTime.sigma.2=30
+washing.duration.mu.2=90
+washing.duration.sigma.2=20
+washing.weekday.mu.2=1
+washing.weekday.sigma.2=0.5
+washing.weekend.mu.2=0
+washing.weekend.sigma.2=0.05
+# 3
+washing.startTime.mu.3=600
+washing.startTime.sigma.3=60
+washing.duration.mu.3=60
+washing.duration.sigma.3=15
+washing.weekday.mu.3=1
+washing.weekday.sigma.3=0.5
+washing.weekend.mu.3=1
+washing.weekend.sigma.3=0.5
+
+### Dishwashing
+
+dishwashing.apps=dishwasher
+# 1
+dishwashing.startTime.mu.1=600
+dishwashing.startTime.sigma.1=60
+dishwashing.duration.mu.1=60
+dishwashing.duration.sigma.1=15
+dishwashing.weekday.mu.1=0
+dishwashing.weekday.sigma.1=0.5
+dishwashing.weekend.mu.1=0
+dishwashing.weekend.sigma.1=0.5
+# 2
+dishwashing.startTime.mu.2=1320
+dishwashing.startTime.sigma.2=30
+dishwashing.duration.mu.2=90
+dishwashing.duration.sigma.2=20
+dishwashing.weekday.mu.2=1
+dishwashing.weekday.sigma.2=0.5
+dishwashing.weekend.mu.2=0
+dishwashing.weekend.sigma.2=0.05
+# 3
+dishwashing.startTime.mu.3=600
+dishwashing.startTime.sigma.3=60
+dishwashing.duration.mu.3=60
+dishwashing.duration.sigma.3=15
+dishwashing.weekday.mu.3=1
+dishwashing.weekday.sigma.3=0.5
+dishwashing.weekend.mu.3=1
+dishwashing.weekend.sigma.3=0.5
+
+# Personal-care
+
+personal-care.apps=hairdryer,instant-water-heater
+# 1
+personal-care.startTime.mu.1=1100
+personal-care.startTime.sigma.1=360
+personal-care.duration.mu.1=10
+personal-care.duration.sigma.1=1
+personal-care.weekday.mu.1=1
+personal-care.weekday.sigma.1=0.5
+personal-care.weekend.mu.1=1
+personal-care.weekend.sigma.1=0.01
+# 2
+personal-care.startTime.mu.2=1320
+personal-care.startTime.sigma.2=30
+personal-care.duration.mu.2=10
+personal-care.duration.sigma.2=1
+personal-care.weekday.mu.2=1
+personal-care.weekday.sigma.2=0.5
+personal-care.weekend.mu.2=1
+personal-care.weekend.sigma.2=0.05
+# 3
+personal-care.startTime.mu.3=960
+personal-care.startTime.sigma.3=400
+personal-care.duration.mu.3=10
+personal-care.duration.sigma.3=1
+personal-care.weekday.mu.3=1
+personal-care.weekday.sigma.3=0.5
+personal-care.weekend.mu.3=1
+personal-care.weekend.sigma.3=0.5
+
+# Chores
+
+chores.apps=vacuum,iron
+# 1
+chores.startTime.mu.1=600
+chores.startTime.sigma.1=60
+chores.duration.mu.1=60
+chores.duration.sigma.1=15
+chores.weekday.mu.1=0
+chores.weekday.sigma.1=0.01
+chores.weekend.mu.1=1
+chores.weekend.sigma.1=0.25
+# 2
+chores.startTime.mu.2=1320
+chores.startTime.sigma.2=30
+chores.duration.mu.2=60
+chores.duration.sigma.2=20
+chores.weekday.mu.2=0
+chores.weekday.sigma.2=0.25
+chores.weekend.mu.2=1
+chores.weekend.sigma.2=0.25
+# 3
+chores.startTime.mu.3=1320
+chores.startTime.sigma.3=400
+chores.duration.mu.3=90
+chores.duration.sigma.3=45
+chores.weekday.mu.3=1
+chores.weekday.sigma.3=0.5
+chores.weekend.mu.3=1
+chores.weekend.sigma.3=0.05
+
+### In house
+
+inhouse.apps=lighting
+# 1
+inhouse.startTime.mu.1=1140
+inhouse.startTime.sigma.1=60
+inhouse.duration.mu.1=400
+inhouse.duration.sigma.1=30
+inhouse.weekday.mu.1=1
+inhouse.weekday.sigma.1=0.01
+inhouse.weekend.mu.1=0
+inhouse.weekend.sigma.1=0.1
+# 2
+inhouse.startTime.mu.2=1140
+inhouse.startTime.sigma.2=60
+inhouse.duration.mu.2=400
+inhouse.duration.sigma.2=30
+inhouse.weekday.mu.2=1
+inhouse.weekday.sigma.2=0.01
+inhouse.weekend.mu.2=0
+inhouse.weekend.sigma.2=0.5
+# 3
+inhouse.startTime.mu.3=1140
+inhouse.startTime.sigma.3=60
+inhouse.duration.mu.3=400
+inhouse.duration.sigma.3=30
+inhouse.weekday.mu.3=1
+inhouse.weekday.sigma.3=0.01
+inhouse.weekend.mu.3=1
+inhouse.weekend.sigma.3=0.01

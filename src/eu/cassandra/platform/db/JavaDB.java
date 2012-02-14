@@ -1,4 +1,4 @@
-package eu.cassandra.platform.test.db;
+package eu.cassandra.platform.db;
 
 import java.io.File;
 import java.sql.Connection;
@@ -15,6 +15,7 @@ import org.apache.log4j.PropertyConfigurator;
 import eu.cassandra.platform.utilities.FileUtils;
 import eu.cassandra.platform.utilities.Params;
 
+// TODO Comments javadoc and inline
 
 public class JavaDB {
 
@@ -296,7 +297,7 @@ public class JavaDB {
 		"PRIMARY KEY (ActivityID,OnTick) \n " + 
 		")";
 
-	//Tests
+	// Tests
 	public static void main(String args[]) {
 		long start = Calendar.getInstance().getTimeInMillis();
 		PropertyConfigurator.configure(Params.LOG_CONFIG_FILE);
