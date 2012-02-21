@@ -14,6 +14,7 @@ import org.jfree.data.xy.XYDataset;
 
 import eu.cassandra.entities.installations.Installation;
 import eu.cassandra.platform.Simulation;
+import eu.cassandra.platform.utilities.FileUtils;
 import eu.cassandra.platform.utilities.Params;
 
 import java.awt.*;
@@ -34,7 +35,7 @@ import javax.swing.*;
  *
  */
 public class GUI implements Runnable {
-	
+
 	// Initialize all swing objects
 	private JFrame f = new JFrame("Cassanda GUI"); 
 	private JPanel buttonPanel = new JPanel();  
@@ -56,10 +57,10 @@ public class GUI implements Runnable {
 	private JMenuItem menuItemQuit = new JMenuItem("Quit"); // Quit sub item
 	private JMenu menuHelp = new JMenu("Help"); // Help Menu entry
 	private JMenuItem menuItemAbout = new JMenuItem("About"); // About Entry
-	
+
 	// Graph related variables
 	private TimeSeriesCollection dataset;
-	
+
 	// Simulation related variables
 	private Simulation sim = null;
 
@@ -75,7 +76,7 @@ public class GUI implements Runnable {
 		logTextAreaScrollPane.setPreferredSize(new Dimension(400, 500));
 
 		projectFileField.setPreferredSize(new Dimension(600, 20));
-		projectFileField.setText(Params.SIM_PROPS);
+		projectFileField.setText(new File(Params.SIM_PROPS).getAbsolutePath());
 		projectFileField.setEditable(false);
 
 		f.setJMenuBar(menuBar);
@@ -161,9 +162,7 @@ public class GUI implements Runnable {
 			cal.set(Calendar.YEAR, 2012);
 			cal.set(Calendar.MONTH, Calendar.JANUARY);
 			cal.set(Calendar.DAY_OF_MONTH, 1);
-			System.out.println(cal);
 			Minute minute = new Minute(cal.getTime());
-//			minute.peg(cal);
 			double value = 0;
 			for(int i = 0; i < sim.getEndTick()-1; i++) {
 				if(installationCombo.getSelectedIndex() == 0) {
@@ -183,12 +182,27 @@ public class GUI implements Runnable {
 	public class ListenProjectFileField  implements MouseListener {
 		public void mousePressed(MouseEvent e) {
 			JFileChooser fc = new JFileChooser();
-			fc.setCurrentDirectory(new File(System.getProperty("user.dir")));
+			fc.setCurrentDirectory(new File(Params.SIM_PROPS));
 			CassandraProjectFileFilter filter = new CassandraProjectFileFilter();
 			fc.setFileFilter(filter);
 			int returnVal = fc.showOpenDialog(f);
 			if(returnVal == JFileChooser.APPROVE_OPTION) {
-				System.out.println("You chose to open this file: " + fc.getSelectedFile().getName());
+				dataset.removeAllSeries();
+				File selectedFile = fc.getSelectedFile();
+				projectFileField.setText(selectedFile.getAbsolutePath());
+				Params.ACT_PROPS = FileUtils.getString(selectedFile.getPath(), 
+						"activitiesFile",Params.ACT_PROPS);
+				Params.APPS_PROPS = FileUtils.getString(selectedFile.getPath(), 
+						"appliancesFile",Params.APPS_PROPS);
+				Params.DEMOG_PROPS = FileUtils.getString(selectedFile.getPath(), 
+						"demographicsFile",Params.DEMOG_PROPS);
+				Params.SIM_PROPS = selectedFile.getPath();
+				Params.LOG_CONFIG_FILE = FileUtils.getString(selectedFile.getPath(), 
+						"logFile","config/log.conf");
+				Params.REGISTRIES_DIR = FileUtils.getString(selectedFile.getPath(), 
+						"registries","registries/");
+				Params.JAVADB_PROPS = FileUtils.getString(selectedFile.getPath(), 
+						"javaDBFile",Params.JAVADB_PROPS);
 			}
 		}
 

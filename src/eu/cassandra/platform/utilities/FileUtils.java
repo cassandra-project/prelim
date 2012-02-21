@@ -131,12 +131,18 @@ public abstract class FileUtils {
 		return arr;
 	}
 	
-	public static String getString(String propsFile, String key) {
-		return getString(loadProperties(propsFile), key);
+	public static String getString(String propsFile, String key, String defaultKey) {
+		return getString(loadProperties(propsFile), key, defaultKey);
 	}
 	
-	public static String getString(Properties props, String key) {
+	public static String getString(String propsFile, String key) {
+		return getString(loadProperties(propsFile), key, null);
+	}
+	
+	public static String getString(Properties props, String key, String defaultKey) {
 		String s = props.getProperty(key);
+		if(s == null)
+			s = defaultKey;
 		return s;
 	}
 	
