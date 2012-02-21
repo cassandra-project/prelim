@@ -1,0 +1,95 @@
+activities=reading,reading-dimmer,reading-self-dimmer
+
+### Reading
+
+reading.apps=lighting
+# 1 (College student)
+reading.startTime.mu.1=480
+reading.startTime.sigma.1=20
+reading.duration.mu.1=720
+reading.duration.sigma.1=10
+reading.weekday.mu.1=1
+reading.weekday.sigma.1=0.01
+reading.weekend.mu.1=0.01
+reading.weekend.sigma.1=0.01
+# 2 (College student 2)
+reading.startTime.mu.2=1080
+reading.startTime.sigma.2=20
+reading.duration.mu.2=240
+reading.duration.sigma.2=20
+reading.weekday.mu.2=0.01
+reading.weekday.sigma.2=0.01
+reading.weekend.mu.2=0.01
+reading.weekend.sigma.2=0.01
+# 3 (College student 3)
+reading.startTime.mu.3=960
+reading.startTime.sigma.3=20
+reading.duration.mu.3=360
+reading.duration.sigma.3=10
+reading.weekday.mu.3=0.01
+reading.weekday.sigma.3=0.01
+reading.weekend.mu.3=0.01
+reading.weekend.sigma.3=0.01
+
+### Reading Dimmer
+
+reading-dimmer.apps=autodimmer
+# 1 (College student)
+reading-dimmer.startTime.mu.1=960
+reading-dimmer.startTime.sigma.1=20
+reading-dimmer.duration.mu.1=240
+reading-dimmer.duration.sigma.1=20
+reading-dimmer.weekday.mu.1=0.01
+reading-dimmer.weekday.sigma.1=0.01
+reading-dimmer.weekend.mu.1=0.01
+reading-dimmer.weekend.sigma.1=0.01
+# 2 (College student 2)
+reading-dimmer.startTime.mu.2=960
+reading-dimmer.startTime.sigma.2=20
+reading-dimmer.duration.mu.2=240
+reading-dimmer.duration.sigma.2=20
+reading-dimmer.weekday.mu.2=1
+reading-dimmer.weekday.sigma.2=0.01
+reading-dimmer.weekend.mu.2=0.01
+reading-dimmer.weekend.sigma.2=0.01
+# 3 (College student 3)
+reading-dimmer.startTime.mu.3=960
+reading-dimmer.startTime.sigma.3=20
+reading-dimmer.duration.mu.3=240
+reading-dimmer.duration.sigma.3=20
+reading-dimmer.weekday.mu.3=0.01
+reading-dimmer.weekday.sigma.3=0.01
+reading-dimmer.weekend.mu.3=0.01
+reading-dimmer.weekend.sigma.3=0.01
+
+
+### Reading Self-Dimmer
+
+reading-self-dimmer.apps=selfdimmer
+# 1 (College student)
+reading-self-dimmer.startTime.mu.1=960
+reading-self-dimmer.startTime.sigma.1=20
+reading-self-dimmer.duration.mu.1=240
+reading-self-dimmer.duration.sigma.1=20
+reading-self-dimmer.weekday.mu.1=0.01
+reading-self-dimmer.weekday.sigma.1=0.01
+reading-self-dimmer.weekend.mu.1=0.01
+reading-self-dimmer.weekend.sigma.1=0.01
+# 2 (College student 2)
+reading-self-dimmer.startTime.mu.2=960
+reading-self-dimmer.startTime.sigma.2=20
+reading-self-dimmer.duration.mu.2=240
+reading-self-dimmer.duration.sigma.2=20
+reading-self-dimmer.weekday.mu.2=0.01
+reading-self-dimmer.weekday.sigma.2=0.01
+reading-self-dimmer.weekend.mu.2=0.01
+reading-self-dimmer.weekend.sigma.2=0.01
+# 3 (College student 3)
+reading-self-dimmer.startTime.mu.3=960
+reading-self-dimmer.startTime.sigma.3=20
+reading-self-dimmer.duration.mu.3=240
+reading-self-dimmer.duration.sigma.3=30
+reading-self-dimmer.weekday.mu.3=1
+reading-self-dimmer.weekday.sigma.3=0.01
+reading-self-dimmer.weekend.mu.3=0.01
+reading-self-dimmer.weekend.sigma.3=0.01
