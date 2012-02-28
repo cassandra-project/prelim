@@ -33,7 +33,7 @@ public class Registry {
 	public float getValue(int tick) {
 		return values[tick];
 	}
-	
+
 	public float[] getValues() {
 		return values;
 	}
@@ -42,15 +42,32 @@ public class Registry {
 		values[tick] = value;
 	}
 
+	public double getMean() {
+		 return getMean(0, values.length-1);
+	}
 	public double getMean(int startTick, int endTick) {
-		double mean = 0.0;
-		for (int i = startTick; i <= endTick; i ++) {
-			mean += values[i];
-		}
+		double mean = getSum(startTick, endTick);
 		mean /= (endTick - startTick + 1);
 		return mean;
 	}
 
+
+	public double getSum() {
+		return getSum(0, values.length-1);
+	}
+
+	public double getSum(int startTick, int endTick) {
+		double sum = 0.0;
+		for (int i = startTick; i <= endTick; i ++) {
+			sum += values[i];
+		}
+		return sum;
+	}
+
+	public double getVariance() {
+		return getVariance(0, values.length-1);
+	}
+	
 	public double getVariance(int startTick, int endTick) {
 		double var = 0.0;
 		double mean = getMean(startTick, endTick);
@@ -60,7 +77,7 @@ public class Registry {
 		var /= (endTick - startTick + 1);
 		return var;
 	}
-	
+
 	public void saveRegistry(File parrentFolder) {
 		try {
 			File file = new File(parrentFolder.getPath() + "/" + 
