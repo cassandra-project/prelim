@@ -45,15 +45,19 @@ public class Registry {
 	public double getMean() {
 		 return getMean(0, values.length-1);
 	}
+	
 	public double getMean(int startTick, int endTick) {
 		double mean = getSum(startTick, endTick);
 		mean /= (endTick - startTick + 1);
 		return mean;
 	}
 
-
 	public double getSum() {
 		return getSum(0, values.length-1);
+	}
+	
+	public double getSumKWh() {
+		return getSumKWh(0, values.length-1);
 	}
 
 	public double getSum(int startTick, int endTick) {
@@ -62,6 +66,14 @@ public class Registry {
 			sum += values[i];
 		}
 		return sum;
+	}
+	
+	public double getSumKWh(int startTick, int endTick) {
+		double sum = 0.0;
+		for (int i = startTick; i <= endTick; i ++) {
+			sum += values[i];
+		}
+		return sum/60000.0;
 	}
 
 	public double getVariance() {

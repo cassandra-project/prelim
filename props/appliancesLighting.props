@@ -1,4 +1,8 @@
-appliances=lighting,autodimmer,selfdimmer
+#appliances=lighting,autodimmer,selfdimmer
+#appliances=lighting,autodimmer,selfdimmer
+#appliances=autodimmer
+#appliances=lighting
+appliances=selfdimmer
 
 lighting.power=2100
 lighting.periods=120
@@ -11,6 +15,6 @@ autodimmer.stand-by=0
 autodimmer.base=false
 
 selfdimmer.power=1050, 1500, 2100
-selfdimmer.periods=90,90,90
+selfdimmer.periods=30,60,180
 selfdimmer.stand-by=0
 selfdimmer.base=false

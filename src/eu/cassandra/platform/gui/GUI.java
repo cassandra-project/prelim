@@ -173,10 +173,10 @@ public class GUI implements Runnable {
 		axis.setTickMarkPosition(DateTickMarkPosition.START);
 		axis.setDateFormatOverride(new SimpleDateFormat("dd"));
 
-		XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
-		BasicStroke basicStroke = new BasicStroke(2f);
-		renderer.setSeriesStroke(0, basicStroke);
-		chart.getXYPlot().setRenderer(renderer);
+//		XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
+//		BasicStroke basicStroke = new BasicStroke(1f);
+//		renderer.setSeriesStroke(0, basicStroke);
+//		chart.getXYPlot().setRenderer(renderer);
 
 		chart.setAntiAlias(true);
 		chart.setTextAntiAlias(true);
@@ -217,9 +217,9 @@ public class GUI implements Runnable {
 				statsTextArea.setText("Statistics:\n" + 
 						"Days: " + FileUtils.getInt(Params.SIM_PROPS, "days")  +"\n" + 
 						"Installations: " + sim.getInstallations().size() +  "\n" + 
-						"Total Comsumption: " + twoDecimals.format(selectedReg.getSum()) + "\n" + 
-						"Average Comsumption: " + twoDecimals.format(selectedReg.getMean()) + "\n"  + 
-						"Variance: " + twoDecimals.format(selectedReg.getVariance()) );
+						"Total Comsumption: " + twoDecimals.format(selectedReg.getSumKWh()) + " KWh\n" + 
+						"Average Power Consumption: " + twoDecimals.format(selectedReg.getMean()/1000) + " KW\n"  + 
+						"Power Consumption Variance: " + twoDecimals.format(selectedReg.getVariance()/1000000) + " KW\n");
 			}
 		}
 	}
