@@ -1,0 +1,7 @@
+activitiesFile = props/activitiesLighting.props
+appliancesFile = props/appliancesLighting.props
+demographicsFile = props/demographicsLighting.props
+javaDBFile = config/javaDB.conf
+setup=dynamic
+days=3
+installations=15
