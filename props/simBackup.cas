@@ -1,7 +1,0 @@
-activitiesFile = props/activitiesLighting.props
-appliancesFile = props/appliancesLighting.props
-demographicsFile = props/demographicsLighting.props
-javaDBFile = props/javaDB.props
-
-days = 3
-installations = 15
