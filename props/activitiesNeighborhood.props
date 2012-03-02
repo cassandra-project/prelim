@@ -1,6 +1,5 @@
 activities=breakfast,cooking,light-cooking,entertainment,washing,dishwashing,personal-care,inhouse,chores
-
-### Breakfast
+person-types=3
 
 breakfast.apps=coffee-maker,toaster,boiler
 # 1 (College student)

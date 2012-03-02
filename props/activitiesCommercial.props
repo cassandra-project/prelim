@@ -1,0 +1,123 @@
+activities=breakfast,stove,oven,television,radio,dvd,dishwashing,chores,lighting,printer,pc
+person-types=1
+
+### Coffee-house
+breakfast.apps=coffee-maker,toaster,boiler,microwave
+breakfast.startTime.mu.1=840
+breakfast.startTime.sigma.1=400
+breakfast.duration.mu.1=1
+breakfast.duration.sigma.1=0.1
+breakfast.weekday.mu.1=200
+breakfast.weekday.sigma.1=50
+breakfast.weekend.mu.1=300
+breakfast.weekend.sigma.1=100
+
+### Stove
+stove.apps=stove
+stove.startTime.mu.1=700
+stove.startTime.sigma.1=10
+stove.duration.mu.1=300
+stove.duration.sigma.1=10
+stove.weekday.mu.1=1
+stove.weekday.sigma.1=0.00001
+stove.weekend.mu.1=1
+stove.weekend.sigma.1=0.00001
+
+### Oven
+oven.apps=oven
+oven.startTime.mu.1=700
+oven.startTime.sigma.1=10
+oven.duration.mu.1=300
+oven.duration.sigma.1=10
+oven.weekday.mu.1=1
+oven.weekday.sigma.1=0.00001
+oven.weekend.mu.1=1
+oven.weekend.sigma.1=0.00001
+
+### Television
+television.apps=television
+television.startTime.mu.1=480
+television.startTime.sigma.1=30
+television.duration.mu.1=720
+television.duration.sigma.1=30
+television.weekday.mu.1=1
+television.weekday.sigma.1=0.00001
+television.weekend.mu.1=1
+television.weekend.sigma.1=0.00001
+
+### PC
+pc.apps=personal-computer
+pc.startTime.mu.1=540
+pc.startTime.sigma.1=30
+pc.duration.mu.1=720
+pc.duration.sigma.1=30
+pc.weekday.mu.1=1
+pc.weekday.sigma.1=0.00001
+pc.weekend.mu.1=1
+pc.weekend.sigma.1=0.00001
+
+### printer
+printer.apps=printer
+printer.startTime.mu.1=840
+printer.startTime.sigma.1=300
+printer.duration.mu.1=3
+printer.duration.sigma.1=1
+printer.weekday.mu.1=40
+printer.weekday.sigma.1=10
+printer.weekend.mu.1=70
+printer.weekend.sigma.1=10
+
+### DVD
+dvd.apps=dvd-player
+dvd.startTime.mu.1=480
+dvd.startTime.sigma.1=30
+dvd.duration.mu.1=720
+dvd.duration.sigma.1=30
+dvd.weekday.mu.1=1
+dvd.weekday.sigma.1=0.0001
+dvd.weekend.mu.1=2
+dvd.weekend.sigma.1=0.0001
+
+### Radio Player
+radio.apps=radio-player
+radio.startTime.mu.1=480
+radio.startTime.sigma.1=30
+radio.duration.mu.1=720
+radio.duration.sigma.1=30
+radio.weekday.mu.1=1
+radio.weekday.sigma.1=0.00001
+radio.weekend.mu.1=1
+radio.weekend.sigma.1=0.00001
+
+### Dishwashing
+dishwashing.apps=dishwasher
+dishwashing.startTime.mu.1=840
+dishwashing.startTime.sigma.1=300
+dishwashing.duration.mu.1=60
+dishwashing.duration.sigma.1=30
+dishwashing.weekday.mu.1=3
+dishwashing.weekday.sigma.1=0.00001
+dishwashing.weekend.mu.1=4
+dishwashing.weekend.sigma.1=0.00001
+
+# Chores
+chores.apps=vacuum
+chores.startTime.mu.1=420
+chores.startTime.sigma.1=10
+chores.duration.mu.1=90
+chores.duration.sigma.1=10
+chores.weekday.mu.1=1
+chores.weekday.sigma.1=0.00001
+chores.weekend.mu.1=1
+chores.weekend.sigma.1=0.00001
+
+### In house
+lighting.apps=lighting
+lighting.startTime.mu.1=300
+lighting.startTime.sigma.1=10
+lighting.duration.mu.1=800
+lighting.duration.sigma.1=10
+lighting.weekday.mu.1=1
+lighting.weekday.sigma.1=0.00001
+lighting.weekend.mu.1=1
+lighting.weekend.sigma.1=0.00001

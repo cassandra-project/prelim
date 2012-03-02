@@ -163,8 +163,8 @@ public class Gaussian implements ProbabilityDistribution {
     
     public static void main(String[] args) {
     	System.out.println("Testing num of time per day.");
-    	Gaussian g = new Gaussian(1, 0.05);
-    	g.precompute(0, 3, 4);
+    	Gaussian g = new Gaussian(1, 0.00001);
+    	g.precompute(0, 1439, 1440);
     	double sum = 0;
     	for(int i = 0; i <= 3; i++) {
     		sum += g.getPrecomputedProbability(i);
@@ -178,8 +178,13 @@ public class Gaussian implements ProbabilityDistribution {
     	System.out.println(g.getPrecomputedBin());
     	System.out.println(g.getPrecomputedBin());
     	System.out.println("Testing start time.");
-    	g = new Gaussian(620, 90);
+    	g = new Gaussian(620, 200);
     	g.precompute(0, 1439, 1440);
+    	System.out.println(g.getPrecomputedBin());
+    	System.out.println(g.getPrecomputedBin());
+    	System.out.println(g.getPrecomputedBin());
+    	System.out.println(g.getPrecomputedBin());
+    	System.out.println(g.getPrecomputedBin());
     	System.out.println(g.getPrecomputedBin());
     	System.out.println(g.getPrecomputedBin());
     	System.out.println(g.getPrecomputedBin());

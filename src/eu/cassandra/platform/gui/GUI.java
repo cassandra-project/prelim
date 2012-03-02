@@ -15,6 +15,7 @@ import org.jfree.data.xy.XYDataset;
 
 import eu.cassandra.entities.installations.Installation;
 import eu.cassandra.platform.Simulation;
+import eu.cassandra.platform.exceptions.SetupException;
 import eu.cassandra.platform.utilities.FileUtils;
 import eu.cassandra.platform.utilities.Params;
 import eu.cassandra.platform.utilities.Registry;
@@ -145,7 +146,12 @@ public class GUI implements Runnable {
 		installationCombo.setEnabled(false);
 		installationCombo.removeActionListener(a);
 		installationCombo.removeAllItems();
-		sim.setup();
+		try {
+			sim.setup();
+		} catch (SetupException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
 		sim.simulate();
 		installationCombo.addItem("All installations");
 		for(Installation inst : sim.getInstallations()) {

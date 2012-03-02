@@ -12,6 +12,7 @@ import eu.cassandra.entities.appliances.Appliance;
 import eu.cassandra.entities.installations.Installation;
 import eu.cassandra.entities.people.Activity;
 import eu.cassandra.entities.people.Person;
+import eu.cassandra.platform.exceptions.SetupException;
 import eu.cassandra.platform.math.Gaussian;
 import eu.cassandra.platform.math.ProbabilityDistribution;
 import eu.cassandra.platform.utilities.Constants;
@@ -119,51 +120,31 @@ public class Simulation implements Runnable {
 		registry.saveRegistry(folder);
 	}
 	
-	public void setup() {
+	public void setup() throws SetupException {
 		installations = new Vector<Installation>();
 		logger.info("Simulation setup started.");
-		// Initialize simulation variables
 		int numOfDays = FileUtils.getInt(Params.SIM_PROPS, "days");
-		int numOfInstallations = 
-				FileUtils.getInt(Params.SIM_PROPS, "installations");
 		endTick = Constants.MIN_IN_DAY * numOfDays;
 		registry = new Registry("Total", endTick);
-		queue = new  PriorityBlockingQueue<Event>(2 * numOfInstallations);
-		
-		// Read the different kinds of appliances
-		String[] appliances = 
-				FileUtils.getStringArray(Params.APPS_PROPS, "appliances");
-		// Read appliances statistics
-		double[] ownershipPerc = new double[appliances.length];
-		for(int i = 0; i < appliances.length; i++) {
-			ownershipPerc[i] = 
-					FileUtils.getDouble(Params.DEMOG_PROPS, 
-							appliances[i]+".perc");
-		}
-		// Create the installations and put appliances inside
-		for(int i = 0; i < numOfInstallations; i++) {
-			// Make the installation
-			Installation inst = new Installation.Builder(i, i+"").
-					registry(new Registry(i+"", endTick)).build();
-			// Create the appliances
-			for(int j = 0; j < appliances.length; j++) {
-				double dice = RNG.nextDouble();
-				if(dice < ownershipPerc[j]) {
-					Appliance app = 
-							new Appliance.Builder(appliances[j], inst).build();
-					inst.addAppliance(app);
-					logger.trace(i + " " + appliances[j]);
-				}
-			}
-			installations.add(inst);
+		// Check type of setup
+		String setup = FileUtils.getString(Params.SIM_PROPS, 
+				"setup");
+		if(setup.equalsIgnoreCase("static")) {
+			staticSetup();
+		} else if(setup.equalsIgnoreCase("dynamic")) {
+			dynamicSetup();
+		} else {
+			throw new SetupException("Problem with setup property in " + 
+					Params.SIM_PROPS);
 		}
 		// Load possible activities
 		String[] activities = 
 				FileUtils.getStringArray(Params.ACT_PROPS, "activities");
 		// Put persons inside installations along with activities
-		for(int i = 0; i < numOfInstallations; i++) {
+		int typesOfPersons = FileUtils.getInt(Params.ACT_PROPS, "person-types");
+		for(int i = 0; i < installations.size(); i++) {
 			Installation inst = installations.get(i);
-			int type = RNG.nextInt(3) + 1;
+			int type = RNG.nextInt(typesOfPersons) + 1;
 			Person person = 
 					new Person.Builder("Person " + i, type, inst).build();
 			inst.addPerson(person);
@@ -205,7 +186,7 @@ public class Simulation implements Runnable {
 							Params.ACT_PROPS, 
 							activities[j]+".weekday.sigma."+type);
 					ProbabilityDistribution weekday = new Gaussian(mu, sigma);
-					weekday.precompute(0, 3, 4);
+					weekday.precompute(0, 1439, 1440);
 					
 					mu = FileUtils.getDouble(
 							Params.ACT_PROPS, 
@@ -214,7 +195,7 @@ public class Simulation implements Runnable {
 							Params.ACT_PROPS, 
 							activities[j]+".weekend.sigma."+type);
 					ProbabilityDistribution weekend = new Gaussian(mu, sigma);
-					weekend.precompute(0, 3, 4);
+					weekend.precompute(0, 1439, 1440);
 					
 					Activity act = new Activity.Builder(
 							activities[j], 
@@ -231,6 +212,63 @@ public class Simulation implements Runnable {
 			}
 		}
 		logger.info("Simulation setup finished.");
+	}
+	
+	public void staticSetup() {
+		// Initialize simulation variables
+		String[] namesOfInstallations = 
+				FileUtils.getStringArray(Params.SIM_PROPS, "installations");
+		int numOfInstallations = namesOfInstallations.length;
+		queue = new  PriorityBlockingQueue<Event>(2 * numOfInstallations);
+		for(int i = 0; i < numOfInstallations; i++) {
+			// Make the installation
+			Installation inst = new Installation.Builder(i, i+"").
+					registry(new Registry(i+"", endTick)).build();
+			// Create the appliances
+			String[] instApps = 
+					FileUtils.getStringArray(Params.DEMOG_PROPS, 
+							namesOfInstallations[i]);
+			for(int j = 0; j < instApps.length; j++) {
+				Appliance app = new Appliance.Builder(instApps[j], inst).build();
+				inst.addAppliance(app);
+				logger.trace(i + " " + instApps[j]);
+			}
+			installations.add(inst);
+		}
+	}
+	
+	public void dynamicSetup() {
+		// Initialize simulation variables
+		int numOfInstallations = 
+				FileUtils.getInt(Params.SIM_PROPS, "installations");
+		queue = new  PriorityBlockingQueue<Event>(2 * numOfInstallations);
+		// Read the different kinds of appliances
+		String[] appliances = 
+				FileUtils.getStringArray(Params.APPS_PROPS, "appliances");
+		// Read appliances statistics
+		double[] ownershipPerc = new double[appliances.length];
+		for(int i = 0; i < appliances.length; i++) {
+			ownershipPerc[i] = 
+					FileUtils.getDouble(Params.DEMOG_PROPS, 
+							appliances[i]+".perc");
+		}
+		// Create the installations and put appliances inside
+		for(int i = 0; i < numOfInstallations; i++) {
+			// Make the installation
+			Installation inst = new Installation.Builder(i, i+"").
+					registry(new Registry(i+"", endTick)).build();
+			// Create the appliances
+			for(int j = 0; j < appliances.length; j++) {
+				double dice = RNG.nextDouble();
+				if(dice < ownershipPerc[j]) {
+					Appliance app = 
+							new Appliance.Builder(appliances[j], inst).build();
+					inst.addAppliance(app);
+					logger.trace(i + " " + appliances[j]);
+				}
+			}
+			installations.add(inst);
+		}
 	}
 	
 }
