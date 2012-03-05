@@ -1,4 +1,4 @@
-activitiesFile = props/activitiesNeighborhood.props
+activitiesFile = props/activitiesNeighborhoodLowerPeaks.props
 appliancesFile = props/appliancesNeighborhood.props
 demographicsFile = props/demographicsNeighborhood.props
 javaDBFile = config/javaDB.conf

@@ -25,13 +25,13 @@ stove.weekend.sigma.1=0.00001
 
 ### Oven
 oven.apps=oven
-oven.startTime.mu.1=600
+oven.startTime.mu.1=700
 oven.startTime.sigma.1=10
-oven.duration.mu.1=30
+oven.duration.mu.1=700
 oven.duration.sigma.1=10
-oven.weekday.mu.1=20
+oven.weekday.mu.1=1
 oven.weekday.sigma.1=0.00001
-oven.weekend.mu.1=20
+oven.weekend.mu.1=1
 oven.weekend.sigma.1=0.00001
 
 ### Television

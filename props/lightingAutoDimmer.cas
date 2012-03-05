@@ -1,6 +1,6 @@
 activitiesFile = props/activitiesLighting.props
-appliancesFile = props/appliancesLighting.props
-demographicsFile = props/demographicsLighting.props
+appliancesFile = props/appliancesLightingAutoDimmer.props
+demographicsFile = props/demographicsLightingAutoDimmer.props
 javaDBFile = config/javaDB.conf
 setup=dynamic
 days=5

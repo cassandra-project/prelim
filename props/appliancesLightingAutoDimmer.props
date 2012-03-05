@@ -1,6 +1,6 @@
 #appliances=lighting,autodimmer,selfdimmer
-#appliances=autodimmer
-appliances=lighting
+appliances=autodimmer
+#appliances=lighting
 #appliances=selfdimmer
 
 lighting.power=2100

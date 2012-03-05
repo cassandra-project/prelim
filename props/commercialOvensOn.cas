@@ -1,0 +1,7 @@
+activitiesFile = props/activitiesCommercialOvensOn.props
+appliancesFile = props/appliancesCommercial.props
+demographicsFile = props/demographicsCommercial.props
+javaDBFile = config/javaDB.conf
+setup=static
+installations=coffee-house-1,coffee-house-2,coffee-house-3,restaurant-1,restaurant-2,center,store-1,store-2,store-3,store-4,store-5,store-6,store-7,store-8,store-9,store-10,store-11
+days=7
