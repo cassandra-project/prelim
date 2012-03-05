@@ -10,13 +10,13 @@ public abstract class Params {
 	
 	// Default properties files
 	
-	public static String ACT_PROPS = "props/activities.props";
+	public static String ACT_PROPS;
 	
-	public static String APPS_PROPS = "props/appliances.props";
+	public static String APPS_PROPS;
 	
-	public static String DEMOG_PROPS = "props/demographics.props";
+	public static String DEMOG_PROPS;
 	
-	public static String SIM_PROPS = "props/neighborhood.cas";
+	public static String SIM_PROPS;
 	
 	// Configuration files
 	
@@ -26,5 +26,8 @@ public abstract class Params {
 	
 	/** Defines the registry directory */
 	public static String REGISTRIES_DIR = "registries/";
+	
+	/** Defines the properties directory */
+	public static String PROPS_DIR = "props/";
 	
 }

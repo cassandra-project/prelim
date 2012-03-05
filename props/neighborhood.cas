@@ -1,6 +1,6 @@
-activitiesFile = props/activities.props
-appliancesFile = props/appliances.props
-demographicsFile = props/demographics.props
+activitiesFile = props/activitiesNeighborhood.props
+appliancesFile = props/appliancesNeighborhood.props
+demographicsFile = props/demographicsNeighborhood.props
 javaDBFile = config/javaDB.conf
 setup=dynamic
 days=7

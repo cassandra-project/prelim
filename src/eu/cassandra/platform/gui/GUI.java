@@ -40,7 +40,7 @@ import javax.swing.*;
 public class GUI implements Runnable {
 
 	// Initialize all swing objects
-	private JFrame f = new JFrame("Cassanda GUI"); 
+	private JFrame f = new JFrame("Cassandra GUI"); 
 	private JPanel buttonPanel = new JPanel();  
 	private JScrollPane buttonScrollPane = new JScrollPane(buttonPanel);
 	private JScrollPane graphScrollPane;
@@ -85,7 +85,8 @@ public class GUI implements Runnable {
 		logTextAreaScrollPane.setPreferredSize(new Dimension(400, 500));
 
 		projectFileField.setPreferredSize(new Dimension(600, 20));
-		projectFileField.setText(new File(Params.SIM_PROPS).getAbsolutePath());
+//		projectFileField.setText(new File(Params.SIM_PROPS).getAbsolutePath());
+		projectFileField.setText("");
 		projectFileField.setEditable(false);
 
 		f.setJMenuBar(menuBar);
@@ -236,7 +237,7 @@ public class GUI implements Runnable {
 	public class ListenProjectFileField  implements MouseListener {
 		public void mousePressed(MouseEvent e) {
 			JFileChooser fc = new JFileChooser();
-			fc.setCurrentDirectory(new File(Params.SIM_PROPS));
+			fc.setCurrentDirectory(new File(Params.PROPS_DIR));
 			CassandraProjectFileFilter filter = new CassandraProjectFileFilter();
 			fc.setFileFilter(filter);
 			int returnVal = fc.showOpenDialog(f);
