@@ -88,7 +88,7 @@ public class Appliance {
 		totalCycleTime = builder.totalCycleTime;
 		base = builder.base;
 		inUse = (base) ? true : false;
-		onTick = (base) ? RNG.nextInt(Constants.MIN_IN_DAY) : builder.onTick;
+		onTick = (base) ? -RNG.nextInt(Constants.MIN_IN_DAY) : builder.onTick;
 		who = builder.who;
 	}
 
