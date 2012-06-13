@@ -1,0 +1,7 @@
+activitiesFile = props/activitiesMicrowaveOnly.props
+appliancesFile = props/appliancesMicrowaveOnly.props
+demographicsFile = props/demographicsMicrowaveOnly.props
+javaDBFile = config/javaDB.conf
+setup=dynamic
+days=1
+installations=1

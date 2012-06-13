@@ -1,0 +1,6 @@
+appliances=refrigerator
+
+refrigerator.power=140,117,0
+refrigerator.periods=20,18,73
+refrigerator.stand-by=0
+refrigerator.base=true

@@ -1,0 +1,7 @@
+activitiesFile = props/activitiesFridgeOnly.props
+appliancesFile = props/appliancesFridgeOnly.props
+demographicsFile = props/demographicsFridgeOnly.props
+javaDBFile = config/javaDB.conf
+setup=dynamic
+days=1
+installations=1
