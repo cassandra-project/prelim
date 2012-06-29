@@ -1,0 +1,7 @@
+activitiesFile = props/activitiesSimpleHouse.props
+appliancesFile = props/appliancesSimpleHouse.props
+demographicsFile = props/demographicsSimpleHouse.props
+javaDBFile = config/javaDB.conf
+setup=dynamic
+days=1
+installations=1
