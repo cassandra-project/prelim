@@ -30,7 +30,9 @@ import eu.cassandra.entities.people.Activity;
 import eu.cassandra.entities.people.Person;
 import eu.cassandra.platform.exceptions.SetupException;
 import eu.cassandra.platform.math.Gaussian;
+import eu.cassandra.platform.math.GaussianMixtureModels;
 import eu.cassandra.platform.math.ProbabilityDistribution;
+import eu.cassandra.platform.math.Uniform;
 import eu.cassandra.platform.utilities.Constants;
 import eu.cassandra.platform.utilities.FileUtils;
 import eu.cassandra.platform.utilities.Params;
@@ -194,13 +196,10 @@ public class Simulation implements Runnable
 
         if (existing.size() > 0) {
           logger.trace(i + " " + activities[j]);
-          double mu = 0;
-          double sigma = 0;
-          ProbabilityDistribution start = null;
-          ProbabilityDistribution duration = null;
-          ProbabilityDistribution weekday = null;
-          ProbabilityDistribution weekend = null;
-
+          double mu = 0, sigma = 0, from = 0, to = 0;
+          ProbabilityDistribution start = null, duration = null, weekday = null, weekend =
+            null;
+          double[] means, sigmas, pi;
           String distribution = "";
 
           /* ==========Start Time Distribution========== */
@@ -222,9 +221,43 @@ public class Simulation implements Runnable
             start = new Gaussian(mu, sigma);
             start.precompute(0, 1439, 1440);
             break;
+
+          case ("uniform"):
+            from =
+              FileUtils.getDouble(Params.ACT_PROPS, activities[j]
+                                                    + ".startTime.start."
+                                                    + type);
+            to =
+              FileUtils.getDouble(Params.ACT_PROPS, activities[j]
+                                                    + ".startTime.end." + type);
+            start = new Uniform(from, to);
+            start.precompute(from, to, (int) to + 1);
+            break;
+
+          case ("mixture"):
+            means =
+              FileUtils.getDoubleArray(Params.ACT_PROPS, activities[j]
+                                                         + ".startTime.means."
+                                                         + type);
+            sigmas =
+              FileUtils.getDoubleArray(Params.ACT_PROPS, activities[j]
+                                                         + ".startTime.sigmas."
+                                                         + type);
+
+            pi =
+              FileUtils.getDoubleArray(Params.ACT_PROPS, activities[j]
+                                                         + ".startTime.pi."
+                                                         + type);
+            start = new GaussianMixtureModels(pi.length, pi, means, sigmas);
+            start.precompute(0, 1439, 1440);
+            break;
+
           default:
             System.out.println("Non existing start time distribution type");
           }
+
+          System.out.println("Start Time Distribution");
+          start.status();
 
           /* ==========Duration Distribution========== */
 
@@ -245,11 +278,45 @@ public class Simulation implements Runnable
                                                    + ".duration.sigma." + type);
 
             duration = new Gaussian(mu, sigma);
-            duration.precompute(1, 1439, 1440);
+            duration.precompute(0, 1439, 1440);
             break;
+
+          case ("uniform"):
+            from =
+              FileUtils
+                      .getDouble(Params.ACT_PROPS, activities[j]
+                                                   + ".duration.start." + type);
+            to =
+              FileUtils.getDouble(Params.ACT_PROPS, activities[j]
+                                                    + ".duration.end." + type);
+            duration = new Uniform(from, to);
+            duration.precompute(from, to, (int) to + 1);
+            break;
+
+          case ("mixture"):
+            means =
+              FileUtils.getDoubleArray(Params.ACT_PROPS, activities[j]
+                                                         + ".duration.means."
+                                                         + type);
+            sigmas =
+              FileUtils.getDoubleArray(Params.ACT_PROPS, activities[j]
+                                                         + ".duration.sigmas."
+                                                         + type);
+
+            pi =
+              FileUtils.getDoubleArray(Params.ACT_PROPS, activities[j]
+                                                         + ".duration.pi."
+                                                         + type);
+            duration = new GaussianMixtureModels(pi.length, pi, means, sigmas);
+            duration.precompute(0, 1439, 1440);
+            break;
+
           default:
             System.out.println("Non existing duration distribution type");
           }
+
+          System.out.println("Duration Distribution");
+          duration.status();
 
           /* ==========Weekday Times Distribution========== */
 
@@ -271,9 +338,42 @@ public class Simulation implements Runnable
             weekday.precompute(0, 1439, 1440);
 
             break;
+          case ("uniform"):
+            from =
+              FileUtils.getDouble(Params.ACT_PROPS, activities[j]
+                                                    + ".weekday.start." + type);
+            to =
+              FileUtils.getDouble(Params.ACT_PROPS, activities[j]
+                                                    + ".weekday.end." + type);
+            weekday = new Uniform(from, to);
+            weekday.precompute(from, to, (int) to + 1);
+            break;
+
+          case ("mixture"):
+            means =
+              FileUtils.getDoubleArray(Params.ACT_PROPS, activities[j]
+                                                         + ".weekday.means."
+                                                         + type);
+            sigmas =
+              FileUtils.getDoubleArray(Params.ACT_PROPS, activities[j]
+                                                         + ".weekday.sigmas."
+                                                         + type);
+
+            pi =
+              FileUtils.getDoubleArray(Params.ACT_PROPS, activities[j]
+                                                         + ".weekday.pi."
+                                                         + type);
+            weekday = new GaussianMixtureModels(pi.length, pi, means, sigmas);
+            weekday.precompute(0, 1439, 1440);
+            break;
+
           default:
             System.out.println("Non existing duration distribution type");
           }
+
+          System.out.println("Weekday Distribution");
+          weekday.status();
+
           /* ==========Weekend Times Distribution========== */
 
           distribution =
@@ -293,9 +393,41 @@ public class Simulation implements Runnable
             weekend = new Gaussian(mu, sigma);
             weekend.precompute(0, 1439, 1440);
             break;
+          case ("uniform"):
+            from =
+              FileUtils.getDouble(Params.ACT_PROPS, activities[j]
+                                                    + ".weekend.start." + type);
+            to =
+              FileUtils.getDouble(Params.ACT_PROPS, activities[j]
+                                                    + ".weekend.end." + type);
+            weekend = new Uniform(from, to);
+            weekend.precompute(from, to, (int) to + 1);
+            break;
+
+          case ("mixture"):
+            means =
+              FileUtils.getDoubleArray(Params.ACT_PROPS, activities[j]
+                                                         + ".weekend.means."
+                                                         + type);
+            sigmas =
+              FileUtils.getDoubleArray(Params.ACT_PROPS, activities[j]
+                                                         + ".weekend.sigmas."
+                                                         + type);
+
+            pi =
+              FileUtils.getDoubleArray(Params.ACT_PROPS, activities[j]
+                                                         + ".weekend.pi."
+                                                         + type);
+            weekend = new GaussianMixtureModels(pi.length, pi, means, sigmas);
+            weekend.precompute(0, 1439, 1440);
+            break;
+
           default:
             System.out.println("Non existing duration distribution type");
           }
+
+          System.out.println("Weekend Distribution");
+          weekend.status();
 
           Activity act =
             new Activity.Builder(activities[j], start, duration)

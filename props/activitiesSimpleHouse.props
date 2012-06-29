@@ -1,0 +1,57 @@
+activities=cleaning,entertainment1,entertainment2,washing,working
+person-types=1
+
+cleaning.apps=vacuum-cleaner
+# 1 (College student)
+cleaning.startTime.mu.1=665
+cleaning.startTime.sigma.1=0.00001
+cleaning.duration.mu.1=9
+cleaning.duration.sigma.1=0.00001
+cleaning.weekday.mu.1=1
+cleaning.weekday.sigma.1=0.00001
+cleaning.weekend.mu.1=1
+cleaning.weekend.sigma.1=0.00001
+
+entertainment1.apps=tv
+# 1 (College student)
+entertainment1.startTime.mu.1=300
+entertainment1.startTime.sigma.1=0.00001
+entertainment1.duration.mu.1=120
+entertainment1.duration.sigma.1=0.00001
+entertainment1.weekday.mu.1=1
+entertainment1.weekday.sigma.1=0.00001
+entertainment1.weekend.mu.1=1
+entertainment1.weekend.sigma.1=0.00001
+
+entertainment2.apps=tv
+# 1 (College student)
+entertainment2.startTime.mu.1=750
+entertainment2.startTime.sigma.1=0.00001
+entertainment2.duration.mu.1=200
+entertainment2.duration.sigma.1=0.00001
+entertainment2.weekday.mu.1=1
+entertainment2.weekday.sigma.1=0.00001
+entertainment2.weekend.mu.1=1
+entertainment2.weekend.sigma.1=0.00001
+
+washing.apps=washing-machine
+# 1 (College student)
+washing.startTime.mu.1=500
+washing.startTime.sigma.1=0.00001
+washing.duration.mu.1=180
+washing.duration.sigma.1=0.00001
+washing.weekday.mu.1=1
+washing.weekday.sigma.1=0.00001
+washing.weekend.mu.1=1
+washing.weekend.sigma.1=0.00001
+
+working.apps=laptop
+# 1 (College student)
+working.startTime.mu.1=400
+working.startTime.sigma.1=0.00001
+working.duration.mu.1=800
+working.duration.sigma.1=0.00001
+working.weekday.mu.1=1
+working.weekday.sigma.1=0.00001
+working.weekend.mu.1=1
+working.weekend.sigma.1=0.00001
