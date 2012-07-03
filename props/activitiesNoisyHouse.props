@@ -1,0 +1,32 @@
+activities=cleaning,heating
+person-types=1
+
+cleaning.apps=vacuum-cleaner
+# 1 (College student)
+cleaning.startTime.distribution.1=normal
+cleaning.startTime.mu.1=393
+cleaning.startTime.sigma.1=0.00001
+cleaning.duration.distribution.1=normal
+cleaning.duration.mu.1=9
+cleaning.duration.sigma.1=0.00001
+cleaning.weekday.distribution.1=normal
+cleaning.weekday.mu.1=1
+cleaning.weekday.sigma.1=0.00001
+cleaning.weekend.distribution.1=normal
+cleaning.weekend.mu.1=1
+cleaning.weekend.sigma.1=0.00001
+
+heating.apps=heater
+# 1 (College student)
+heating.startTime.distribution.1=normal
+heating.startTime.mu.1=318
+heating.startTime.sigma.1=0.00001
+heating.duration.distribution.1=normal
+heating.duration.mu.1=9
+heating.duration.sigma.1=0.00001
+heating.weekday.distribution.1=normal
+heating.weekday.mu.1=1
+heating.weekday.sigma.1=0.00001
+heating.weekend.distribution.1=normal
+heating.weekend.mu.1=1
+heating.weekend.sigma.1=0.00001
