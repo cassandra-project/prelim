@@ -1,0 +1,16 @@
+appliances=refrigerator,vacuum-cleaner,heater
+
+refrigerator.power=185,137,0
+refrigerator.periods=32,120,265
+refrigerator.stand-by=0
+refrigerator.base=true
+
+vacuum-cleaner.power=1970
+vacuum-cleaner.periods=10
+vacuum-cleaner.stand-by=0
+vacuum-cleaner.base=false
+
+heater.power=1750
+heater.periods=10
+heater.stand-by=0
+heater.base=false
