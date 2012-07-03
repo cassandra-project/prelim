@@ -1,0 +1,17 @@
+activities=heating
+person-types=1
+
+heating.apps=heater
+# 1 (College student)
+heating.startTime.distribution.1=normal
+heating.startTime.mu.1=600
+heating.startTime.sigma.1=0.0001
+heating.duration.distribution.1=normal
+heating.duration.mu.1=90
+heating.duration.sigma.1=1
+heating.weekday.distribution.1=normal
+heating.weekday.mu.1=1
+heating.weekday.sigma.1=0.0001
+heating.weekend.distribution.1=normal
+heating.weekend.mu.1=1
+heating.weekend.sigma.1=0.0001
