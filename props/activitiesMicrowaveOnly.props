@@ -1,0 +1,17 @@
+activities=cooking
+person-types=1
+
+cooking.apps=microwave
+# 1 (College student)
+cooking.startTime.distribution.1=normal
+cooking.startTime.mu.1=600
+cooking.startTime.sigma.1=0.0001
+cooking.duration.distribution.1=normal
+cooking.duration.mu.1=90
+cooking.duration.sigma.1=1
+cooking.weekday.distribution.1=normal
+cooking.weekday.mu.1=1
+cooking.weekday.sigma.1=0.0001
+cooking.weekend.distribution.1=normal
+cooking.weekend.mu.1=1
+cooking.weekend.sigma.1=0.0001

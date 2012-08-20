@@ -1,0 +1,43 @@
+activities=breakfast
+person-types=3
+
+breakfast.apps=coffee-maker,toaster,boiler
+# 1 (College student)
+breakfast.startTime.distribution.1=normal
+breakfast.startTime.mu.1=600
+breakfast.startTime.sigma.1=120
+breakfast.duration.distribution.1=normal
+breakfast.duration.mu.1=30
+breakfast.duration.sigma.1=5
+breakfast.weekday.distribution.1=normal
+breakfast.weekday.mu.1=1
+breakfast.weekday.sigma.1=1
+breakfast.weekend.distribution.1=normal
+breakfast.weekend.mu.1=1
+breakfast.weekend.sigma.1=1
+# 2 (Working)
+breakfast.startTime.distribution.2=normal
+breakfast.startTime.mu.2=450
+breakfast.startTime.sigma.2=10
+breakfast.duration.distribution.2=normal
+breakfast.duration.mu.2=10
+breakfast.duration.sigma.2=1
+breakfast.weekday.distribution.2=normal
+breakfast.weekday.mu.2=1
+breakfast.weekday.sigma.2=0.05
+breakfast.weekend.distribution.2=normal
+breakfast.weekend.mu.2=1
+breakfast.weekend.sigma.2=0.05
+# 3 (Pensioner)
+breakfast.startTime.distribution.3=normal
+breakfast.startTime.mu.3=450
+breakfast.startTime.sigma.3=120
+breakfast.duration.distribution.3=normal
+breakfast.duration.mu.3=30
+breakfast.duration.sigma.3=5
+breakfast.weekday.distribution.3=normal
+breakfast.weekday.mu.3=1
+breakfast.weekday.sigma.3=0.05
+breakfast.weekend.distribution.3=normal
+breakfast.weekend.mu.3=1
+breakfast.weekend.sigma.3=0.05

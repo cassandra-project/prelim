@@ -1,0 +1,6 @@
+appliances=microwave
+
+microwave.power=1317,1277,1217
+microwave.periods=1,1,1
+microwave.stand-by=0
+microwave.base=false

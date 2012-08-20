@@ -1,7 +1,7 @@
 refrigerator.perc=0.99
 freezer.perc=0.54
-stove.perc=0.85
-oven.perc=0.77
+stove.perc=0.95
+oven.perc=0.85
 microwave.perc=0.84
 toaster.perc=0.65
 coffee-maker.perc=0.5

@@ -14,22 +14,19 @@
    limitations under the License.
 */
 
-package eu.cassandra.platform.utilities;
+package eu.cassandra.platform.exceptions;
 
-/**
- * Class to hold constants
- * 
- * @author Cassandra developers
- *
- */
-public class Constants {
+public class SetupException extends Exception {
 	
-	public final static int MIN_IN_HOUR = 60;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public SetupException() { }
 	
-	public final static int MIN_IN_DAY = 60 * 24;
-	
-	public final static int MU = 0;
-	
-	public final static int SIGMA = 1;
+	public SetupException(String msg) {
+		super(msg);
+	}
 
 }

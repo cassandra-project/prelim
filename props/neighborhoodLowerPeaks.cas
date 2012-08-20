@@ -1,0 +1,7 @@
+activitiesFile = props/activitiesNeighborhoodLowerPeaks.props
+appliancesFile = props/appliancesNeighborhood.props
+demographicsFile = props/demographicsNeighborhood.props
+javaDBFile = config/javaDB.conf
+setup=dynamic
+days=1
+installations=300

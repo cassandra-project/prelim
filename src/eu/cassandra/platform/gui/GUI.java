@@ -1,3 +1,19 @@
+/*   
+   Copyright 2011-2012 The Cassandra Consortium (cassandra-fp7.eu)
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+*/
+
 package eu.cassandra.platform.gui;
 
 import org.jfree.chart.ChartFactory;
@@ -7,6 +23,7 @@ import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.DateTickMarkPosition;
 import org.jfree.chart.axis.DateTickUnit;
 import org.jfree.chart.axis.DateTickUnitType;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.time.Minute;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
@@ -14,7 +31,10 @@ import org.jfree.data.xy.XYDataset;
 
 import eu.cassandra.entities.installations.Installation;
 import eu.cassandra.platform.Simulation;
+import eu.cassandra.platform.exceptions.SetupException;
+import eu.cassandra.platform.utilities.FileUtils;
 import eu.cassandra.platform.utilities.Params;
+import eu.cassandra.platform.utilities.Registry;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -22,9 +42,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 
 import javax.swing.*;
 
@@ -34,13 +54,15 @@ import javax.swing.*;
  *
  */
 public class GUI implements Runnable {
-	
+
 	// Initialize all swing objects
-	private JFrame f = new JFrame("Cassanda GUI"); 
+	private JFrame f = new JFrame("Cassandra GUI"); 
 	private JPanel buttonPanel = new JPanel();  
 	private JScrollPane buttonScrollPane = new JScrollPane(buttonPanel);
 	private JScrollPane graphScrollPane;
 
+	private JTextArea statsTextArea = new JTextArea();
+	private JScrollPane statsTextAreaScrollPane = new JScrollPane(statsTextArea);
 	private JTextArea logTextArea = new JTextArea();
 	private JScrollPane logTextAreaScrollPane = new JScrollPane(logTextArea);
 
@@ -50,16 +72,20 @@ public class GUI implements Runnable {
 	private JComboBox installationCombo = new JComboBox();
 	private ListenInstallationComboBox a;
 
+	private JToggleButton holdButton = new JToggleButton("Hold");
+
 	// Menu
 	private JMenuBar menuBar = new JMenuBar(); // Menubar
 	private JMenu menuFile = new JMenu("File"); // File Entry on Menu bar
 	private JMenuItem menuItemQuit = new JMenuItem("Quit"); // Quit sub item
 	private JMenu menuHelp = new JMenu("Help"); // Help Menu entry
 	private JMenuItem menuItemAbout = new JMenuItem("About"); // About Entry
-	
+
+	private DecimalFormat twoDecimals = new DecimalFormat("#,##0.00");
+
 	// Graph related variables
 	private TimeSeriesCollection dataset;
-	
+
 	// Simulation related variables
 	private Simulation sim = null;
 
@@ -75,7 +101,8 @@ public class GUI implements Runnable {
 		logTextAreaScrollPane.setPreferredSize(new Dimension(400, 500));
 
 		projectFileField.setPreferredSize(new Dimension(600, 20));
-		projectFileField.setText(Params.SIM_PROPS);
+//		projectFileField.setText(new File(Params.SIM_PROPS).getAbsolutePath());
+		projectFileField.setText("");
 		projectFileField.setEditable(false);
 
 		f.setJMenuBar(menuBar);
@@ -85,6 +112,7 @@ public class GUI implements Runnable {
 		menuBar.add(menuFile);       
 		menuBar.add(menuHelp);
 
+		statsTextArea.setFont(new Font("Tahoma", Font.BOLD, 12));
 
 		TimeSeries series = new TimeSeries("");
 		dataset = new TimeSeriesCollection(series);
@@ -94,13 +122,29 @@ public class GUI implements Runnable {
 
 		buttonPanel.add(projectFileField);
 		buttonPanel.add(startButton);
+		buttonPanel.add(holdButton);
 		buttonPanel.add(installationCombo);
 		buttonPanel.add(exitButton);
 
+		statsTextArea.setText("Statistics:\n");
+		logTextArea.setText("Logs:\n");
+
+		JSplitPane textAreaSplitPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+
+		textAreaSplitPanel.setDividerLocation(
+				(int)(Toolkit.getDefaultToolkit().getScreenSize().getHeight()/2));
+		textAreaSplitPanel.add(statsTextAreaScrollPane,JSplitPane.TOP);
+		textAreaSplitPanel.add(logTextAreaScrollPane,JSplitPane.BOTTOM);
+
+
+		JSplitPane mainSplitPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+		mainSplitPanel.add(graphScrollPane,JSplitPane.LEFT);
+		mainSplitPanel.add(textAreaSplitPanel,JSplitPane.RIGHT);
+		mainSplitPanel.setDividerLocation((int)(Toolkit.getDefaultToolkit().getScreenSize().getWidth()/1.5));
+
 		f.getContentPane().setLayout(new BorderLayout());
-		f.getContentPane().add(graphScrollPane, BorderLayout.CENTER);
+		f.getContentPane().add(mainSplitPanel, BorderLayout.CENTER);
 		f.getContentPane().add(buttonScrollPane, BorderLayout.SOUTH);
-		f.getContentPane().add(logTextAreaScrollPane, BorderLayout.EAST);
 
 		f.addWindowListener(new ListenCloseWdw());
 		menuItemQuit.addActionListener(new ListenMenuQuit());
@@ -119,7 +163,12 @@ public class GUI implements Runnable {
 		installationCombo.setEnabled(false);
 		installationCombo.removeActionListener(a);
 		installationCombo.removeAllItems();
-		sim.setup();
+		try {
+			sim.setup();
+		} catch (SetupException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
 		sim.simulate();
 		installationCombo.addItem("All installations");
 		for(Installation inst : sim.getInstallations()) {
@@ -147,12 +196,20 @@ public class GUI implements Runnable {
 		axis.setTickMarkPosition(DateTickMarkPosition.START);
 		axis.setDateFormatOverride(new SimpleDateFormat("dd"));
 
+//		XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
+//		BasicStroke basicStroke = new BasicStroke(1f);
+//		renderer.setSeriesStroke(0, basicStroke);
+//		chart.getXYPlot().setRenderer(renderer);
+
 		chart.setAntiAlias(true);
 		chart.setTextAntiAlias(true);
 
 		return chart;
 	}
 
+	/**
+	 *
+	 */
 	public class ListenInstallationComboBox implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 			TimeSeries series = new TimeSeries("");
@@ -161,34 +218,63 @@ public class GUI implements Runnable {
 			cal.set(Calendar.YEAR, 2012);
 			cal.set(Calendar.MONTH, Calendar.JANUARY);
 			cal.set(Calendar.DAY_OF_MONTH, 1);
-			System.out.println(cal);
 			Minute minute = new Minute(cal.getTime());
-//			minute.peg(cal);
 			double value = 0;
-			for(int i = 0; i < sim.getEndTick()-1; i++) {
-				if(installationCombo.getSelectedIndex() == 0) {
-					value = sim.getRegistry().getValue(i);
-				} else {
-					Installation inst = sim.getInstallation(installationCombo.getSelectedIndex()-1);
-					value = inst.getRegistry().getValue(i);
+			if(installationCombo.getSelectedIndex() >= 0) {
+				Registry selectedReg = null;
+				if(installationCombo.getSelectedIndex() == 0) 
+					selectedReg = sim.getRegistry();
+				else
+					selectedReg =  sim.getInstallation(
+							installationCombo.getSelectedIndex()-1).getRegistry();
+				for(int i = 0; i < sim.getEndTick()-1; i++) {
+					value = selectedReg.getValue(i);
+					minute = new Minute(minute.next().getStart());
+					series.add(minute, value);
 				}
-				minute = new Minute(minute.next().getStart());
-				series.add(minute, value);
+
+				if(!holdButton.isSelected() && !dataset.getSeries().isEmpty()) 
+					dataset.removeAllSeries();
+				dataset.addSeries(series);
+
+				statsTextArea.setText("Statistics:\n" + 
+						"Days: " + FileUtils.getInt(Params.SIM_PROPS, "days")  +"\n" + 
+						"Installations: " + sim.getInstallations().size() +  "\n" + 
+						"Total Comsumption: " + twoDecimals.format(selectedReg.getSumKWh()) + " KWh\n" + 
+						"Average Power Consumption: " + twoDecimals.format(selectedReg.getMean()/1000) + " KW\n"  + 
+						"Power Consumption Variance: " + twoDecimals.format(selectedReg.getVariance()/1000000) + " KW\n");
 			}
-			if(!dataset.getSeries().isEmpty()) dataset.removeAllSeries();
-			dataset.addSeries(series);
 		}
 	}
 
+	/***
+	 *
+	 */
 	public class ListenProjectFileField  implements MouseListener {
 		public void mousePressed(MouseEvent e) {
 			JFileChooser fc = new JFileChooser();
-			fc.setCurrentDirectory(new File(System.getProperty("user.dir")));
+			fc.setCurrentDirectory(new File(Params.PROPS_DIR));
 			CassandraProjectFileFilter filter = new CassandraProjectFileFilter();
 			fc.setFileFilter(filter);
 			int returnVal = fc.showOpenDialog(f);
 			if(returnVal == JFileChooser.APPROVE_OPTION) {
-				System.out.println("You chose to open this file: " + fc.getSelectedFile().getName());
+				dataset.removeAllSeries();
+				File selectedFile = fc.getSelectedFile();
+				projectFileField.setText(selectedFile.getAbsolutePath());
+				Params.ACT_PROPS = FileUtils.getString(selectedFile.getPath(), 
+						"activitiesFile",Params.ACT_PROPS);
+				Params.APPS_PROPS = FileUtils.getString(selectedFile.getPath(), 
+						"appliancesFile",Params.APPS_PROPS);
+				Params.DEMOG_PROPS = FileUtils.getString(selectedFile.getPath(), 
+						"demographicsFile",Params.DEMOG_PROPS);
+				Params.SIM_PROPS = selectedFile.getPath();
+				Params.LOG_CONFIG_FILE = FileUtils.getString(selectedFile.getPath(), 
+						"logFile","config/log.conf");
+				Params.REGISTRIES_DIR = FileUtils.getString(selectedFile.getPath(), 
+						"registries","registries/");
+				Params.JAVADB_PROPS = FileUtils.getString(selectedFile.getPath(), 
+						"javaDBFile",Params.JAVADB_PROPS);
+				installationCombo.removeAllItems();
 			}
 		}
 
@@ -214,7 +300,6 @@ public class GUI implements Runnable {
 
 
 	}
-
 
 	public class ListenExitButton implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
@@ -252,6 +337,7 @@ public class GUI implements Runnable {
 	/**
 	 * Redirects output streams to the GUI.
 	 */
+	@SuppressWarnings("unused")
 	private void redirectSystemStreams() {
 		OutputStream out = new OutputStream() {
 			@Override

@@ -1,0 +1,7 @@
+activitiesFile = props/activitiesLighting.props
+appliancesFile = props/appliancesLightingAutoDimmer.props
+demographicsFile = props/demographicsLightingAutoDimmer.props
+javaDBFile = config/javaDB.conf
+setup=dynamic
+days=5
+installations=15

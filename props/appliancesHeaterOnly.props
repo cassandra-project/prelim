@@ -1,0 +1,6 @@
+appliances=heater
+
+heater.power=1830,0
+heater.periods=7,10
+heater.stand-by=0
+heater.base=false
